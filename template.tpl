@@ -1,2 +1,2 @@
 -{{getBaseURI}}-
--{{require('ui.tpl')()}}-
+-{{require('ui.tpl')->toJSON}}-
