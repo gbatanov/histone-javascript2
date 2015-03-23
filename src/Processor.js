@@ -4,6 +4,8 @@ var HistoneMacro = require('./Macro.js');
 var HistoneArray = require('./Array.js');
 var RTTI = require('./RTTI.js');
 
+function HistoneGlobal() {};
+var globalObject = new HistoneGlobal;
 
 function forEachAsync(list, iterator, ret, start, step) {
 	if (!(list instanceof Object)) return ret();
@@ -179,6 +181,7 @@ function processNode(node, scope, retn, retf) {
 
 	if (node instanceof Array) switch (node[0]) {
 
+		case Constants.AST_GLOBAL: retn(globalObject); break;
 		case Constants.AST_ARRAY: processArray(node, scope, retn); break;
 		case Constants.AST_REGEXP: processRegExp(node, scope, retn); break;
 		case Constants.AST_MACRO: processMacro(node, scope, retn); break;
@@ -203,9 +206,6 @@ function processNode(node, scope, retn, retf) {
 	} else retn(node);
 }
 
-function Processor(node, ret) {
-	var scope = new Scope();
+module.exports = function(node, scope, ret) {
 	processNode(node, scope, ret);
-}
-
-module.exports = Processor;
+};

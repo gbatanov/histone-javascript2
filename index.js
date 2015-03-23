@@ -1,15 +1,15 @@
 var fs = require('fs');
 var Histone = require('./src/Histone.js');
-var Parser = require('./src/parser/Parser.js');
-var Processor = require('./src/Processor.js');
+
+Histone.setResourceLoader(function(requestURI, ret) {
+	console.info('loading', requestURI);
+	fs.readFile(requestURI, 'UTF-8', function(error, template) {
+		ret(template);
+	});
+});
 
 fs.readFile('template.tpl', 'UTF-8', function(error, template) {
-
-	template = Parser(template);
-	console.info(JSON.stringify(template));
-
-	Processor(template, function(result) {
+	Histone(template).render(function(result) {
 		console.info(result);
 	});
-
 });

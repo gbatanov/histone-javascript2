@@ -1,4 +1,2 @@
-{{macro foobar}}
-{{/macro}}
-
-{{foobar->isMacro}}
+-{{getBaseURI}}-
+-{{require('ui.tpl')()}}-

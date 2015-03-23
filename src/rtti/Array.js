@@ -4,6 +4,6 @@ RTTI.register('HistoneArray', 'toString', function(self) {
 	return '[ARRAY]';
 });
 
-RTTI.register('HistoneArray', 'join', function(self, args, ret) {
-
+RTTI.register('HistoneArray', 'size', function(self) {
+	return self.getSize();
 });
