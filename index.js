@@ -1,4 +1,5 @@
 var fs = require('fs');
+var Histone = require('./src/Histone.js');
 var Parser = require('./src/parser/Parser.js');
 var Processor = require('./src/Processor.js');
 

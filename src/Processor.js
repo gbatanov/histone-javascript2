@@ -1,31 +1,9 @@
 var Scope = require('./Scope.js');
 var Constants = require('./Constants.js');
+var HistoneMacro = require('./Macro.js');
+var HistoneArray = require('./Array.js');
 var RTTI = require('./RTTI.js');
 
-var  HistoneArray = function() {
-	// throw 'x';
-};
-
-HistoneArray.prototype.set = function(value, key) {
-	// console.info(value, key);
-};
-
-var registered = [
-	HistoneArray,
-	Date
-];
-
-
-console.info(
-	registered.indexOf(
-		// (new Date).constructor
-		// (new HistoneArray).constructor
-	)
-);
-
-function Histone_Macro(params, body, scope) {
-
-}
 
 function forEachAsync(list, iterator, ret, start, step) {
 	if (!(list instanceof Object)) return ret();
@@ -93,7 +71,7 @@ function processMacro(node, scope, retn) {
 			params[paramIndex] = paramValue, next();
 		});
 	}, function() {
-		scope.putVar(new Histone_Macro(params, node[2], scope), node[1]);
+		scope.putVar(new HistoneMacro(params, node[2], scope), node[1]);
 		retn('');
 	}, 4, 2);
 }

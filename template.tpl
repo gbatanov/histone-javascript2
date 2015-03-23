@@ -1,4 +1,4 @@
-{{macro foo(a, b, c)}}
+{{macro foobar}}
 {{/macro}}
 
-{{[1, 2, 3]->join}}
+{{foobar->isMacro}}
