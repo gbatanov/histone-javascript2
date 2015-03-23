@@ -1,3 +1,4 @@
-{{var x = 10, y = 20, z = 30}}
+{{macro foo(a, b, c)}}
+{{/macro}}
 
-{{z + x}}
+{{[1, 2, 3]->join}}

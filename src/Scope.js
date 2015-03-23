@@ -17,16 +17,17 @@ Scope.prototype.putVar = function(value, index) {
 	this.variables[index] = value;
 };
 
-Scope.prototype.getVar = function(scope, index) {
-	var frame = this;
-	while (scope--) frame = frame.parent;
-	return frame.variables[index];
+Scope.prototype.getVar = function(level, index) {
+	var scope = this;
+	while (level--) scope = scope.parent;
+	return scope.variables[index];
 };
 
 Scope.prototype.extend = function() {
-	var frame = new Scope(this.baseURI, this.thisObj);
-	frame.parent = this;
-	return frame;
+	console.info('Scope.prototype.extend()');
+	var scope = new Scope(this.baseURI, this.thisObj);
+	scope.parent = this;
+	return scope;
 };
 
 module.exports = Scope;

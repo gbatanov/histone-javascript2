@@ -183,8 +183,8 @@ function PrimaryExpression(ctx) {
 		ctx.test(["'", '"']) ? StringLiteral(ctx) :
 		ctx.next('[') ? ArrayExpression(ctx) :
 		ctx.next('{{') ? NodesStatement(ctx, true) :
-		ctx.next('this') ? Constants.AST_THIS :
-		ctx.next('global') ? Constants.AST_GLOBAL :
+		ctx.next('this') ? [Constants.AST_THIS] :
+		ctx.next('global') ? [Constants.AST_GLOBAL] :
 		ctx.test(ctx.INT) ? parseInt(ctx.next().value, 10) :
 		ctx.test(ctx.HEX) ? parseInt(ctx.next().value.slice(2), 16) :
 		ctx.test(ctx.FLOAT) ? parseFloat(ctx.next().value) :
@@ -359,11 +359,14 @@ function ForStatement(ctx) {
 }
 
 function MacroStatement(ctx) {
+
 	var params = [],
 		result = [Constants.AST_MACRO],
 		name = ctx.next(ctx.VAR);
+
 	if (!name) ctx.error('identifier');
 	result.push(name.value);
+
 	if (ctx.next('(') && !ctx.next(')')) {
 		do {
 			name = ctx.next(ctx.VAR);
@@ -379,10 +382,15 @@ function MacroStatement(ctx) {
 		} while (ctx.next(','));
 		if (!ctx.next(')')) ctx.error(')');
 	}
+
 	if (!ctx.next('}}')) ctx.error('}}');
+
 	result.push(NodesStatement(ctx));
+
 	if (!ctx.next('/', 'macro', '}}')) ctx.error('{{/macro}}');
-	return result.concat(params);
+
+	if (params.length) result = result.concat(params.length, params);
+	return result;
 }
 
 function ReturnStatement(ctx) {
@@ -478,107 +486,136 @@ function NodesStatement(ctx, nested) {
 	return result;
 }
 
-function getUsedVars(node, result) {
-	if (!result) result = {frames: [], variables: []};
-	var frames = result.frames, variables = result.variables;
+
+
+function getReference(name, scopeChain) {
+
+
+	var scopeIndex = scopeChain.length;
+	var currentScope = scopeIndex - 1;
+
+	while (scopeIndex--) {
+		var scope = scopeChain[scopeIndex];
+		if (scope.hasOwnProperty(name)) return [
+			Constants.AST_REF,
+			currentScope - scopeIndex,
+			scope[name]
+		];
+	}
+
+	return [Constants.AST_METHOD, [Constants.AST_GLOBAL], name];
+
+}
+
+function setReference(name, scopeChain) {
+	var lastScope = scopeChain[scopeChain.length - 1];
+	if (!lastScope.hasOwnProperty(name))
+		lastScope[name] = Object.keys(lastScope).length;
+	return lastScope[name];
+}
+
+function array_key_exists(key, array) {
+	return (typeof array[key] !== 'undefined');
+}
+
+
+
+function markReferences(node, scopeChain, pushFrame) {
+
+	if (typeof pushFrame !== 'boolean') pushFrame = true;
+	if (typeof scopeChain !== 'object') scopeChain = [];
+
 	switch (node instanceof Array ? node[0] : null) {
 
 		case Constants.AST_REF: {
-			var name = node[1];
-			var index = frames.length;
-			while (index--) {
-				var frame = frames[index];
-				if (!frame.hasOwnProperty(name)) continue;
-				frame = frame[name];
-				variables.push(frame[frame.length - 1]);
-				break;
-			}
+			Array.prototype.splice.apply(node, [0, node.length].concat(
+				getReference(node[1], scopeChain)
+			));
 			break;
 		}
 
 		case Constants.AST_VAR: {
-			var name = node[2];
-			getUsedVars(node[1], result);
-			var frame = frames[frames.length - 1];
-			if (!frame.hasOwnProperty(name)) frame[name] = [];
-			frame[name].push(node);
+			markReferences(node[1], scopeChain);
+			node[2] = setReference(node[2], scopeChain);
+			break;
+		}
+
+		case Constants.AST_FOR: {
+
+			markReferences(node[4], scopeChain);
+
+			scopeChain.push({});
+			setReference('self', scopeChain);
+			if (node[1] !== null) node[1] = setReference(node[1], scopeChain);
+			if (node[2] !== null) node[2] = setReference(node[2], scopeChain);
+			markReferences(node[3], scopeChain, false);
+			scopeChain.pop();
+
+			for (var c = 5; c < node.length; c += 2) {
+				markReferences(node[c], scopeChain);
+				if (!array_key_exists(c + 1, node)) break;
+				markReferences(node[c + 1], scopeChain);
+			}
+
+			break;
+		}
+
+		case Constants.AST_MACRO: {
+
+
+			for (var c = 4; c < node.length; ++c) {
+				var param = node[c];
+				if (!array_key_exists(2, param)) continue;
+				markReferences(param[2], scopeChain);
+			}
+
+
+			node[1] = setReference(node[1], scopeChain);
+
+			scopeChain.push({});
+			setReference('self', scopeChain);
+
+			if (array_key_exists(3, node)) {
+				var paramList = [];
+				for (var c = 4; c < node.length; c++) {
+					var param = node[c];
+					setReference(param[1], scopeChain);
+					if (array_key_exists(2, param)) {
+						paramList.push(c - 4);
+						paramList.push(param[2]);
+					}
+				}
+				Array.prototype.splice.apply(node, [4, node.length].concat(paramList));
+			}
+
+			markReferences(node[2], scopeChain, false);
+			scopeChain.pop();
 			break;
 		}
 
 		case Constants.AST_NODES: {
-			frames.push({});
+			if (pushFrame) scopeChain.push({});
 			for (var c = 1; c < node.length; ++c)
-				getUsedVars(node[c], result);
-			frames.pop();
+				markReferences(node[c], scopeChain);
+			if (pushFrame) scopeChain.pop();
 			break;
 		}
 
 		default: if (node instanceof Array) {
 			for (var c = 0; c < node.length; c++) {
-				getUsedVars(node[c], result);
+				markReferences(node[c], scopeChain);
 			}
 		}
 
+
 	}
-
-	return variables;
-
 }
-
-function removeUnusedVars(nodes, usedVars, repeat) {
-
-	if (!(nodes instanceof Array)) return repeat;
-	var length = nodes.length - 1;
-	nodes.push(nodes.shift());
-
-	while (length--) {
-		var node = nodes.shift();
-		switch (node instanceof Array ? node[0] : null) {
-
-			case Constants.AST_VAR: {
-				if (usedVars.indexOf(node) >= 0) {
-					if (removeUnusedVars(node[1], usedVars, repeat)) repeat = true;
-					nodes.push(node);
-				} else repeat = true;
-				break;
-			}
-
-			case Constants.AST_MACRO: {
-				throw 'x';
-				// if (usedVars.indexOf(node) >= 0) {
-				// 	for (var c = 3; c < node.length; ++c) {
-				// // 		if (!array_key_exists(2, $param = &$node[$c])) continue;
-				// 		if (removeUnusedVars(param[2], usedVars, repeat)) repeat = true;
-				// 	}
-				// 	if (removeUnusedVars(node[2], usedVars, repeat)) repeat = true;
-				// 	nodes.push(node);
-				// } else repeat = true;
-				break;
-			}
-
-			default: {
-				removeUnusedVars(node, usedVars, repeat);
-				nodes.push(node);
-			}
-
-		}
-	}
-
-	return repeat;
-
-}
-
 
 function Parser(input, baseURI) {
 	var ctx = tokenize(input, baseURI),
 		result = NodesStatement(ctx);
 	if (!ctx.next(ctx.$EOF)) ctx.error('EOF');
-
-	// for (;;) {
-	// 	var used = getUsedVars(result);
-	// 	if (!removeUnusedVars(result, used)) break;
-	// }
-
+	markReferences(result);
 	return result;
 }
 
