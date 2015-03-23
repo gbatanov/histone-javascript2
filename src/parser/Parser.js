@@ -11,27 +11,57 @@ var validRegexpFlags = /^(?:([gim])(?!.*\1))*$/;
 // used to convert control characters into regular characters
 var stringEscapeRegExp = /\\(x[0-9A-F]{2}|u[0-9A-F]{4}|\n|.)/g;
 
+function escapeStringLiteral(string) {
+	// var string = string.slice(1, -1);
+	return string.replace(stringEscapeRegExp, function(str, match) {
+		switch (match[0]) {
+			// line continuation
+			case '\n': return '';
+			// null character
+			case '0': return String.fromCharCode(0);
+			// backspace
+			case 'b': return String.fromCharCode(8);
+			// form feed
+			case 'f': return String.fromCharCode(12);
+			// new line
+			case 'n': return String.fromCharCode(10);
+			// carriage return
+			case 'r': return String.fromCharCode(13);
+			// horizontal tab
+			case 't': return String.fromCharCode(9);
+			// vertical tab
+			case 'v': return String.fromCharCode(11);
+			// hexadecimal sequence (2 digits: dd)
+			case 'x': return String.fromCharCode(parseInt(match.substr(1), 16));
+			// unicode sequence (4 hex digits: dddd)
+			case 'u': return String.fromCharCode(parseInt(match.substr(1), 16));
+			// by default return escaped character "as is"
+			default: return match;
+		}
+	});
+}
+
 function tokenize(input, baseURI) {
 	if (!tokenizer) {
 		tokenizer = new Tokenizer();
-		tokenizer.add('PROP', 'null\\b');
-		tokenizer.add('PROP', 'true\\b');
-		tokenizer.add('PROP', 'false\\b');
-		tokenizer.add(['PROP', 'STATEMENT'], 'if\\b');
-		tokenizer.add(['PROP', 'STATEMENT'], 'in\\b');
-		tokenizer.add(['PROP', 'STATEMENT'], 'for\\b');
-		tokenizer.add(['PROP', 'STATEMENT'], 'var\\b');
-		tokenizer.add(['PROP', 'STATEMENT'], 'else\\b');
-		tokenizer.add(['PROP', 'STATEMENT'], 'macro\\b');
-		tokenizer.add(['PROP', 'STATEMENT'], 'elseif\\b');
-		tokenizer.add(['PROP', 'STATEMENT'], 'return\\b');
+		tokenizer.add('PROP', /null\b/);
+		tokenizer.add('PROP', /true\b/);
+		tokenizer.add('PROP', /false\b/);
+		tokenizer.add(['PROP', 'STATEMENT'], /if\b/);
+		tokenizer.add(['PROP', 'STATEMENT'], /in\b/);
+		tokenizer.add(['PROP', 'STATEMENT'], /for\b/);
+		tokenizer.add(['PROP', 'STATEMENT'], /var\b/);
+		tokenizer.add(['PROP', 'STATEMENT'], /else\b/);
+		tokenizer.add(['PROP', 'STATEMENT'], /macro\b/);
+		tokenizer.add(['PROP', 'STATEMENT'], /elseif\b/);
+		tokenizer.add(['PROP', 'STATEMENT'], /return\b/);
 		tokenizer.add('HEX', /0[xX][0-9A-Fa-f]+/);
 		tokenizer.add('FLOAT', /(?:[0-9]*\.)?[0-9]+[eE][+-]?[0-9]+/);
 		tokenizer.add('FLOAT', /[0-9]*\.[0-9]+/);
 		tokenizer.add('INT', /[0-9]+/);
-		tokenizer.add(['PROP', 'REF'], 'this\\b');
-		tokenizer.add(['PROP', 'REF'], 'self\\b');
-		tokenizer.add(['PROP', 'REF'], 'global\\b');
+		tokenizer.add(['PROP', 'REF'], /this\b/);
+		tokenizer.add(['PROP', 'REF'], /self\b/);
+		tokenizer.add(['PROP', 'REF'], /global\b/);
 		tokenizer.add(['PROP', 'REF', 'VAR'], /[_$a-zA-Z][_$a-zA-Z0-9]*/);
 		tokenizer.add(['SPACES', 'EOL'], /[\x0A\x0D]+/);
 		tokenizer.add('SPACES', /[\x09\x20]+/);
@@ -71,53 +101,25 @@ function tokenize(input, baseURI) {
 	return tokenizer.tokenize(input, baseURI);
 }
 
-function escapeStringLiteral(string) {
-	// var string = string.slice(1, -1);
-	return string.replace(stringEscapeRegExp, function(str, match) {
-		switch (match[0]) {
-			// line continuation
-			case '\n': return '';
-			// null character
-			case '0': return String.fromCharCode(0);
-			// backspace
-			case 'b': return String.fromCharCode(8);
-			// form feed
-			case 'f': return String.fromCharCode(12);
-			// new line
-			case 'n': return String.fromCharCode(10);
-			// carriage return
-			case 'r': return String.fromCharCode(13);
-			// horizontal tab
-			case 't': return String.fromCharCode(9);
-			// vertical tab
-			case 'v': return String.fromCharCode(11);
-			// hexadecimal sequence (2 digits: dd)
-			case 'x': return String.fromCharCode(parseInt(match.substr(1), 16));
-			// unicode sequence (4 hex digits: dddd)
-			case 'u': return String.fromCharCode(parseInt(match.substr(1), 16));
-			// by default return escaped character "as is"
-			default: return match;
-		}
-	});
-}
-
-function ParenthesizedExpression(ctx) {
-	var result = Expression(ctx);
-	if (!ctx.next(')')) ctx.error(')');
+function ArrayExpression(ctx) {
+	var key, values = {}, result = [Constants.AST_ARRAY];
+	do {
+		while (ctx.next(','));
+		if (ctx.next(']')) return result;
+		if (key = ctx.next(ctx.PROP, ':')) {
+			if (!values.hasOwnProperty(key = key[0].value)) {
+				values[key] = result.length;
+				result.push([Constants.AST_NOP, Expression(ctx), key]);
+			} else result[values[key]][1] = Expression(ctx);
+		} else if (key = Expression(ctx), (typeof key === 'string' || typeof key === 'number') && ctx.next(':')) {
+			if (!values.hasOwnProperty(String(key = key[0].value))) {
+				values[key] = result.length;
+				result.push([Constants.AST_NOP, Expression(ctx), key]);
+			} else result[values[key]][1] = Expression(ctx);
+		} else result.push([Constants.AST_NOP, key]);
+	} while (ctx.next(','));
+	if (!ctx.next(']')) ctx.error(']');
 	return result;
-}
-
-function StringLiteral(ctx) {
-	var fragment, result = '', start = ctx.next().value;
-	for (ctx = ctx.setIgnored(); fragment = ctx.next();) {
-		if (fragment === ctx.$EOF)
-			ctx.error('unterminated string literal');
-		if ((fragment = fragment.value) === start)
-			return escapeStringLiteral(result);
-		else if (fragment === '\\')
-			result += '\\' + ctx.next().value;
-		else result += fragment;
-	}
 }
 
 function RegexpLiteral(ctx) {
@@ -150,6 +152,25 @@ function RegexpLiteral(ctx) {
 	}
 
 	return [Constants.AST_REGEXP, result, flagNum];
+}
+
+function StringLiteral(ctx) {
+	var fragment, result = '', start = ctx.next().value;
+	for (ctx = ctx.setIgnored(); fragment = ctx.next();) {
+		if (fragment === ctx.$EOF)
+			ctx.error('unterminated string literal');
+		if ((fragment = fragment.value) === start)
+			return escapeStringLiteral(result);
+		else if (fragment === '\\')
+			result += '\\' + ctx.next().value;
+		else result += fragment;
+	}
+}
+
+function ParenthesizedExpression(ctx) {
+	var result = Expression(ctx);
+	if (!ctx.next(')')) ctx.error(')');
+	return result;
 }
 
 function PrimaryExpression(ctx) {
@@ -276,28 +297,101 @@ function ExpressionStatement(ctx) {
 	return expression;
 }
 
+function IfStatement(ctx) {
+	var condition, result = [Constants.AST_IF];
+	do {
+		condition = Expression(ctx);
+		if (!ctx.next('}}')) ctx.error('}}');
+		result.push(NodesStatement(ctx), condition);
+	} while (ctx.next('elseif'));
+
+	if (ctx.next('else')) {
+		if (!ctx.next('}}')) ctx.error('}}');
+		result.push(NodesStatement(ctx))
+	}
+	if (!ctx.next('/', 'if', '}}')) ctx.error('{{/if}}');
+	return result;
+}
+
 function VarStatement(ctx) {
-
 	var name, result = [T_ARRAY];
-
 	if (!ctx.test(ctx.VAR, '=')) {
 		name = ctx.next(ctx.VAR);
 		if (!name) ctx.error('identifier');
 		if (!ctx.next('}}')) ctx.error('}}');
 		result = [Constants.AST_VAR, NodesStatement(ctx), name.value];
 		if (!ctx.next('/', 'var')) ctx.error('{{/var}}');
-	}
-
-	else do {
+	} else do {
 		name = ctx.next(ctx.VAR);
 		if (!name) ctx.error('identifier');
 		if (!ctx.next('=')) ctx.error('=');
 		result.push([Constants.AST_VAR, Expression(ctx), name.value]);
 		if (!ctx.next(',')) break;
 	} while (!ctx.test(ctx.$EOF));
-
 	if (!ctx.next('}}')) ctx.error('}}');
+	return result;
+}
 
+function ForStatement(ctx) {
+	var expression, result = [Constants.AST_FOR];
+	if (expression = ctx.next(ctx.VAR)) {
+		expression = expression.value;
+		if (ctx.next(':')) {
+			result.push(expression);
+			if (expression = ctx.next(ctx.VAR))
+				result.push(expression.value);
+			else ctx.error('identifier');
+		} else result.push(null, expression);
+	} else result.push(null, null);
+	if (!ctx.next('in')) ctx.error('in');
+	do {
+		expression = Expression(ctx);
+		if (!ctx.next('}}')) ctx.error('}}');
+		result.push(NodesStatement(ctx), expression);
+	} while (ctx.next('elseif'));
+	if (ctx.next('else')) {
+		if (!ctx.next('}}')) ctx.error('}}');
+		result.push(NodesStatement(ctx));
+	}
+	if (!ctx.next('/', 'for', '}}'))
+		ctx.error('{{/for}}');
+	return result;
+}
+
+function MacroStatement(ctx) {
+	var params = [],
+		result = [Constants.AST_MACRO],
+		name = ctx.next(ctx.VAR);
+	if (!name) ctx.error('identifier');
+	result.push(name.value);
+	if (ctx.next('(') && !ctx.next(')')) {
+		do {
+			name = ctx.next(ctx.VAR);
+			if (!name) ctx.error('identifier');
+			if (ctx.next('=')) params.push([
+				Constants.AST_NOP,
+				name.value,
+				Expression(ctx)
+			]); else params.push([
+				Constants.AST_NOP,
+				name.value
+			]);
+		} while (ctx.next(','));
+		if (!ctx.next(')')) ctx.error(')');
+	}
+	if (!ctx.next('}}')) ctx.error('}}');
+	result.push(NodesStatement(ctx));
+	if (!ctx.next('/', 'macro', '}}')) ctx.error('{{/macro}}');
+	return result.concat(params);
+}
+
+function ReturnStatement(ctx) {
+	var result = [Constants.AST_RETURN];
+	if (ctx.next('}}')) {
+		result.push(NodesStatement(ctx));
+		if (!ctx.next('/', 'return')) ctx.error('{{/return}}');
+	} else result.push(Expression(ctx));
+	if (!ctx.next('}}')) ctx.error('}}');
 	return result;
 }
 
@@ -336,11 +430,38 @@ function Statement(ctx) {
 	return [T_BREAK];
 }
 
-function NodesStatement(ctx, nested) {
+function removeOutputNodes(nodes) {
+	var c, node, length = nodes.length - 1;
+	nodes.push(nodes.shift());
+	while (length--) {
+		node = nodes.shift();
+		switch (node instanceof Array ? node[0] : null) {
+			case Constants.AST_IF: {
+				for (c = 1; c < node.length; c += 2)
+					node[c] = removeOutputNodes(node[c]);
+				nodes.push(node);
+				break;
+			}
+			case Constants.AST_FOR: {
+				for (c = 3; c < node.length; c += 2)
+					node[c] = removeOutputNodes(node[c]);
+				nodes.push(node);
+				break;
+			}
+			case Constants.AST_VAR:
+			case Constants.AST_MACRO:
+			case Constants.AST_RETURN: {
+				nodes.push(node);
+				break;
+			}
+		}
+	}
+	return nodes;
+}
 
+function NodesStatement(ctx, nested) {
 	var node, type, hasReturn = false,
 		result = [Constants.AST_NODES];
-
 	for (ctx = ctx.setIgnored();;) {
 		if (nested && ctx.test('}}')) break;
 		node = Statement(ctx);
@@ -352,17 +473,112 @@ function NodesStatement(ctx, nested) {
 			else Array.prototype.push.apply(result, node.slice(1));
 		}
 	}
-
 	if (nested && !ctx.next('}}')) ctx.error('}}');
-	if (hasReturn) removeOutputNodes(result);
+	if (hasReturn) result = removeOutputNodes(result);
 	return result;
+}
+
+function getUsedVars(node, result) {
+	if (!result) result = {frames: [], variables: []};
+	var frames = result.frames, variables = result.variables;
+	switch (node instanceof Array ? node[0] : null) {
+
+		case Constants.AST_REF: {
+			var name = node[1];
+			var index = frames.length;
+			while (index--) {
+				var frame = frames[index];
+				if (!frame.hasOwnProperty(name)) continue;
+				frame = frame[name];
+				variables.push(frame[frame.length - 1]);
+				break;
+			}
+			break;
+		}
+
+		case Constants.AST_VAR: {
+			var name = node[2];
+			getUsedVars(node[1], result);
+			var frame = frames[frames.length - 1];
+			if (!frame.hasOwnProperty(name)) frame[name] = [];
+			frame[name].push(node);
+			break;
+		}
+
+		case Constants.AST_NODES: {
+			frames.push({});
+			for (var c = 1; c < node.length; ++c)
+				getUsedVars(node[c], result);
+			frames.pop();
+			break;
+		}
+
+		default: if (node instanceof Array) {
+			for (var c = 0; c < node.length; c++) {
+				getUsedVars(node[c], result);
+			}
+		}
+
+	}
+
+	return variables;
 
 }
+
+function removeUnusedVars(nodes, usedVars, repeat) {
+
+	if (!(nodes instanceof Array)) return repeat;
+	var length = nodes.length - 1;
+	nodes.push(nodes.shift());
+
+	while (length--) {
+		var node = nodes.shift();
+		switch (node instanceof Array ? node[0] : null) {
+
+			case Constants.AST_VAR: {
+				if (usedVars.indexOf(node) >= 0) {
+					if (removeUnusedVars(node[1], usedVars, repeat)) repeat = true;
+					nodes.push(node);
+				} else repeat = true;
+				break;
+			}
+
+			case Constants.AST_MACRO: {
+				throw 'x';
+				// if (usedVars.indexOf(node) >= 0) {
+				// 	for (var c = 3; c < node.length; ++c) {
+				// // 		if (!array_key_exists(2, $param = &$node[$c])) continue;
+				// 		if (removeUnusedVars(param[2], usedVars, repeat)) repeat = true;
+				// 	}
+				// 	if (removeUnusedVars(node[2], usedVars, repeat)) repeat = true;
+				// 	nodes.push(node);
+				// } else repeat = true;
+				break;
+			}
+
+			default: {
+				removeUnusedVars(node, usedVars, repeat);
+				nodes.push(node);
+			}
+
+		}
+	}
+
+	return repeat;
+
+}
+
 
 function Parser(input, baseURI) {
 	var ctx = tokenize(input, baseURI),
 		result = NodesStatement(ctx);
 	if (!ctx.next(ctx.$EOF)) ctx.error('EOF');
+
+	// for (;;) {
+	// 	var used = getUsedVars(result);
+	// 	if (!removeUnusedVars(result, used)) break;
+	// }
+
 	return result;
 }
 
