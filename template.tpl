@@ -1,2 +1,7 @@
--{{getBaseURI}}-
--{{require('ui.tpl')->toJSON}}-
+{{macro myMacro}}
+
+{{/macro}}
+
+{{'string'}}
+
+{{global->testMethod}}

@@ -34,6 +34,17 @@ module.exports = {
 
 	RE_GLOBAL: 0x01,
 	RE_MULTILINE: 0x02,
-	RE_IGNORECASE: 0x04
+	RE_IGNORECASE: 0x04,
+
+	T_BASE: 'type',
+	T_UNDEFINED: 'undefined',
+	T_NULL: 'null',
+	T_BOOLEAN: 'boolean',
+	T_NUMBER: 'number',
+	T_STRING: 'string',
+	T_REGEXP: 'RegExp',
+	T_ARRAY: 'HistoneArray',
+	T_MACRO: 'HistoneMacro',
+	T_GLOBAL: 'HistoneGlobal'
 
 };
