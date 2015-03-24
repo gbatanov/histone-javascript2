@@ -1,6 +1,5 @@
-var RTTI = require('./RTTI.js');
-var Scope = require('./Scope.js');
-var Processor = require('./Processor.js');
+var Runtime = require('./Runtime.js'),
+	Template = require('./Template.js');
 
 function getCallerURI() {
 	var prepareStackTrace = Error.prepareStackTrace;
@@ -12,38 +11,23 @@ function getCallerURI() {
 	return stack[1].getFileName();
 }
 
-function Template(template, baseURI) {
-	this.baseURI = baseURI;
-	this.template = template;
-}
-
-Template.prototype.getAST = function() {
-	return this.template;
-};
-
-Template.prototype.render = function(ret, thisObj) {
-	var scope = new Scope(this.baseURI, thisObj);
-	Processor(this.template, scope, ret);
-};
-
 function Histone(template, baseURI) {
-	if (typeof baseURI !== 'string')
-		baseURI = getCallerURI();
-	template = RTTI.parse(template, baseURI);
+	if (typeof baseURI !== 'string') baseURI = getCallerURI();
+	template = Runtime.parseTemplate(template, baseURI);
 	return new Template(template, baseURI);
 }
 
-Histone.setResourceLoader = RTTI.setResourceLoader;
+Histone.setResourceLoader = Runtime.setResourceLoader;
 
-require('./rtti/Type.js');
-require('./rtti/Undefined.js');
-require('./rtti/Null.js');
-require('./rtti/Boolean.js');
-require('./rtti/Number.js');
-require('./rtti/String.js');
-require('./rtti/Array.js');
-require('./rtti/RegExp.js');
-require('./rtti/Macro.js');
-require('./rtti/Global.js');
+require('./types/Type.js');
+require('./types/Undefined.js');
+require('./types/Null.js');
+require('./types/Boolean.js');
+require('./types/Number.js');
+require('./types/String.js');
+require('./types/Array.js');
+require('./types/RegExp.js');
+require('./types/Macro.js');
+require('./types/Global.js');
 
 module.exports = Histone;

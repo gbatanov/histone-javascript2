@@ -2,7 +2,7 @@ var Scope = require('./Scope.js');
 var Constants = require('./Constants.js');
 var HistoneMacro = require('./Macro.js');
 var HistoneArray = require('./Array.js');
-var RTTI = require('./RTTI.js');
+var Runtime = require('./Runtime.js');
 
 function HistoneGlobal() {};
 var globalObject = new HistoneGlobal;
@@ -80,27 +80,27 @@ function processMacro(node, scope, retn) {
 
 function processNot(node, scope, retn) {
 	processNode(node[1], scope, function(value) {
-		retn(!RTTI.toBoolean(value));
+		retn(!Runtime.toBoolean(value));
 	});
 }
 
 function processOr(node, scope, retn) {
 	processNode(node[1], scope, function(value) {
-		if (RTTI.toBoolean(value)) retn(value);
+		if (Runtime.toBoolean(value)) retn(value);
 		else processNode(node[2], scope, retn);
 	});
 }
 
 function processAnd(node, scope, retn) {
 	processNode(node[1], scope, function(value) {
-		if (!RTTI.toBoolean(value)) retn(value);
+		if (!Runtime.toBoolean(value)) retn(value);
 		else processNode(node[2], scope, retn);
 	});
 }
 
 function processTernary(node, scope, retn) {
 	processNode(node[1], scope, function(condition) {
-		if (RTTI.toBoolean(condition))
+		if (Runtime.toBoolean(condition))
 			processNode(node[2], scope, retn);
 		else if (array_key_exists(3, node))
 			processNode(node[3], scope, retn);
@@ -111,7 +111,7 @@ function processTernary(node, scope, retn) {
 function processProperty(node, scope, retn) {
 	processNode(node[1], scope, function(left) {
 		processNode(node[2], scope, function(right) {
-			RTTI.call(left, '__get', [right], scope, retn);
+			Runtime.call(left, '__get', [right], scope, retn);
 		});
 	});
 }
@@ -119,7 +119,7 @@ function processProperty(node, scope, retn) {
 function processMethod(node, scope, retn, args) {
 	if (!(args instanceof Array)) args = [];
 	processNode(node[1], scope, function(subject) {
-		RTTI.call(subject, node[2], args, scope, retn);
+		Runtime.call(subject, node[2], args, scope, retn);
 	});
 }
 
@@ -135,7 +135,7 @@ function processCall(node, scope, retn) {
 			callee[0] === Constants.AST_METHOD) {
 			processMethod(callee, scope, retn, args);
 		} else processNode(callee, scope, function(callee) {
-			RTTI.call(callee, '__call', args, scope, retn);
+			Runtime.call(callee, '__call', args, scope, retn);
 		});
 	}, 2);
 }
@@ -145,7 +145,7 @@ function processIf(node, scope, retn, retf) {
 	forEachAsync(node, function(statement, next, index) {
 		if (array_key_exists(index + 1, node)) {
 			processNode(node[index + 1], scope, function(value) {
-				if (!RTTI.toBoolean(value)) return next();
+				if (!Runtime.toBoolean(value)) return next();
 				processNode(statement, scope, function(value) {
 					result = value, next(true);
 				}, retf);
@@ -168,7 +168,7 @@ function processNodes(node, scope, retn, retf) {
 	scope = scope.extend();
 	forEachAsync(node, function(node, next) {
 		processNode(node, scope, function(node) {
-			result += RTTI.toString(node);
+			result += Runtime.toString(node);
 			next();
 		}, retf);
 	}, function() { retn(result); }, 1);
