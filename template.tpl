@@ -4,4 +4,4 @@
 
 {{'string'}}
 
-{{10->isInt}}
+{{myMacro->isMacro}}
