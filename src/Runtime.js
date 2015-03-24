@@ -32,14 +32,14 @@ function getHandler(value, member) {
 	}
 
 	if (!typeInfo.hasOwnProperty(handler))
-		handler = 'type';
+		handler = 'base';
 
 	handler = typeInfo[handler];
 
 	if (handler.hasOwnProperty(member))
 		return handler[member];
 
-	return typeInfo['type'][member];
+	return typeInfo['base'][member];
 }
 
 
@@ -100,6 +100,18 @@ function parseTemplate(template, baseURI) {
 
 
 module.exports = {
+
+	T_BASE: 'base',
+	T_UNDEFINED: 'undefined',
+	T_NULL: 'null',
+	T_BOOLEAN: 'boolean',
+	T_NUMBER: 'number',
+	T_STRING: 'string',
+	T_REGEXP: 'RegExp',
+	T_ARRAY: 'HistoneArray',
+	T_MACRO: 'HistoneMacro',
+	T_GLOBAL: 'HistoneGlobal',
+
 	register: register,
 	call: callAsync,
 	toString: toString,
