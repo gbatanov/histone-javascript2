@@ -1,5 +1,7 @@
 var Runtime = require('../Runtime.js');
 
+Runtime.register(Runtime.T_ARRAY, 'isArray', true);
+
 Runtime.register(Runtime.T_ARRAY, 'toString', function(self) {
 	return '[ARRAY]';
 });

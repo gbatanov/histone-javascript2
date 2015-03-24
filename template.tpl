@@ -1,7 +1,1 @@
-{{macro myMacro}}
-
-{{/macro}}
-
-{{'string'}}
-
-{{myMacro->isMacro}}
+{{this->isString}}

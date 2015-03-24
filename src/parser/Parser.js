@@ -1,5 +1,6 @@
 var Tokenizer = require('./Tokenizer.js');
 var Constants = require('../Constants.js');
+var Optimize = require('./Optimizer.js');
 
 const T_NOP = -1;
 const T_BREAK = -2;
@@ -344,11 +345,13 @@ function ForStatement(ctx) {
 		} else result.push(null, expression);
 	} else result.push(null, null);
 	if (!ctx.next('in')) ctx.error('in');
+
 	do {
 		expression = Expression(ctx);
 		if (!ctx.next('}}')) ctx.error('}}');
-		result.push(NodesStatement(ctx), expression);
+		result.push(NodeArray(ctx), expression);
 	} while (ctx.next('elseif'));
+
 	if (ctx.next('else')) {
 		if (!ctx.next('}}')) ctx.error('}}');
 		result.push(NodesStatement(ctx));
@@ -385,7 +388,7 @@ function MacroStatement(ctx) {
 
 	if (!ctx.next('}}')) ctx.error('}}');
 
-	result.push(NodesStatement(ctx));
+	result.push(NodeArray(ctx));
 
 	if (!ctx.next('/', 'macro', '}}')) ctx.error('{{/macro}}');
 
@@ -486,6 +489,25 @@ function NodesStatement(ctx, nested) {
 	return result;
 }
 
+function NodeArray(ctx) {
+	var node, type, hasReturn = false,
+		result = [Constants.AST_NODELIST];
+	for (ctx = ctx.setIgnored();;) {
+		node = Statement(ctx);
+		type = (node instanceof Array ? node[0] : null);
+		if (type === T_BREAK) break;
+		if (!hasReturn && type !== T_NOP) {
+			if (type === Constants.AST_RETURN) hasReturn = true;
+			if (type !== T_ARRAY) result.push(node);
+			else Array.prototype.push.apply(result, node.slice(1));
+		}
+	}
+	if (hasReturn) result = removeOutputNodes(result);
+	return result;
+}
+
+
+
 
 
 function getReference(name, scopeChain) {
@@ -520,10 +542,9 @@ function array_key_exists(key, array) {
 
 
 
-function markReferences(node, scopeChain, pushFrame) {
+function markReferences(node, scopeChain) {
 
-	if (typeof pushFrame !== 'boolean') pushFrame = true;
-	if (typeof scopeChain !== 'object') scopeChain = [];
+	if (typeof scopeChain !== 'object') scopeChain = [{}];
 
 	switch (node instanceof Array ? node[0] : null) {
 
@@ -548,7 +569,7 @@ function markReferences(node, scopeChain, pushFrame) {
 			setReference('self', scopeChain);
 			if (node[1] !== null) node[1] = setReference(node[1], scopeChain);
 			if (node[2] !== null) node[2] = setReference(node[2], scopeChain);
-			markReferences(node[3], scopeChain, false);
+			markReferences(node[3], scopeChain);
 			scopeChain.pop();
 
 			for (var c = 5; c < node.length; c += 2) {
@@ -588,16 +609,16 @@ function markReferences(node, scopeChain, pushFrame) {
 				Array.prototype.splice.apply(node, [4, node.length].concat(paramList));
 			}
 
-			markReferences(node[2], scopeChain, false);
+			markReferences(node[2], scopeChain);
 			scopeChain.pop();
 			break;
 		}
 
 		case Constants.AST_NODES: {
-			if (pushFrame) scopeChain.push({});
+			scopeChain.push({});
 			for (var c = 1; c < node.length; ++c)
 				markReferences(node[c], scopeChain);
-			if (pushFrame) scopeChain.pop();
+			scopeChain.pop();
 			break;
 		}
 
@@ -613,8 +634,11 @@ function markReferences(node, scopeChain, pushFrame) {
 
 function Parser(input, baseURI) {
 	var ctx = tokenize(input, baseURI),
-		result = NodesStatement(ctx);
+		result = NodeArray(ctx);
 	if (!ctx.next(ctx.$EOF)) ctx.error('EOF');
+
+	Optimize(result);
+
 	markReferences(result);
 	return result;
 }

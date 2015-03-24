@@ -11,6 +11,22 @@ Runtime.register(Runtime.T_GLOBAL, 'getBaseURI', function(self, args, scope) {
 	return scope.getBaseURI();
 });
 
+Runtime.register(Runtime.T_GLOBAL, 'resolveURI', function(self, args, scope) {
+	var relURI = args[0];
+	if (typeof relURI !== 'string') return;
+	var baseURI = (args.length > 1 ? args[1] : scope.getBaseURI());
+	if (typeof baseURI !== 'string') return;
+	var absURI = Runtime.resolveURI(relURI, baseURI);
+	return (typeof absURI === 'string' ? absURI : undefined);
+});
+
+Runtime.register(Runtime.T_GLOBAL, 'getUniqueId', function(self) {
+	return ('xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx').replace(/[xy]/g, function(c) {
+		var r = Math.random() * 16 | 0, v = (c === 'x' ? r : r & 0x3 | 0x8);
+		return v.toString(16);
+	});
+});
+
 Runtime.register(Runtime.T_GLOBAL, 'loadText', function(self, args, scope, ret) {
 	var requestURI = args[0];
 	if (typeof requestURI !== 'string') return ret();
