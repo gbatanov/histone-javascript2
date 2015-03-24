@@ -1,37 +1,42 @@
 var Runtime = require('../Runtime.js');
+var HistoneMacro = require('../Macro.js');
 var Processor = require('../Processor.js');
 
 Runtime.register(Runtime.T_MACRO, 'isMacro', true);
 Runtime.register(Runtime.T_MACRO, 'toBoolean', true);
 Runtime.register(Runtime.T_MACRO, 'toString', '(Macro)');
 
+
+Runtime.register(Runtime.T_MACRO, '__get', '[__get]');
+Runtime.register(Runtime.T_MACRO, 'toJSON', '[toJSON]');
+Runtime.register(Runtime.T_MACRO, 'extend', '[extend]');
+Runtime.register(Runtime.T_MACRO, 'call', '[call]');
+
+
+
+Runtime.register(Runtime.T_MACRO, 'bind', function(self, args) {
+	var macro = new HistoneMacro(self.params, self.body, self.scope);
+	macro.args = (self.args || []).concat(args);
+	return macro;
+});
+
 Runtime.register(Runtime.T_MACRO, '__call', function(self, args, scope, ret) {
 
-	var caller = scope.getBaseURI();
-	var scope = self.scope.extend();
-
-	// merge binded args and call args
-	// var callArgs = [self.args].concat(args);
-	var callArgs = [].concat(args);
+	var macroParams = self.params,
+		macroScope = self.scope.extend(),
+		callArgs = (self.args || []).concat(args);
 
 	scope.putVar('self', {
-		// 'callee' => $this,
-		// 'caller' => $caller,
-		// 'arguments' => $args
+		callee: self,
+		caller: scope.getBaseURI(),
+		arguments: callArgs
 	});
 
-	// default parameters
-	var params = self.params;
-	for (var c = 0; c < params.length; c++) {
-		if (callArgs[c] === undefined) {
-			scope.putVar(params[c], c + 1);
-		} else {
-			scope.putVar(callArgs[c], c + 1);
-		}
+	for (var c = 0; c < macroParams.length; c++) {
+		if (callArgs[c] === undefined)
+			macroScope.putVar(macroParams[c], c + 1);
+		else macroScope.putVar(callArgs[c], c + 1);
 	}
 
-	// console.info(params);
-
-	Processor(self.body, scope, ret);
-
+	Processor(self.body, macroScope, ret);
 }, true);

@@ -1,3 +1,5 @@
-{{var foo = 42}}
+{{macro foo}}
+	HELLO
+{{/macro}}
 
 {{return foo}}

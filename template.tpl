@@ -1,1 +1,1 @@
-{{this->isString}}
+{{[1.98: 'bar']}}

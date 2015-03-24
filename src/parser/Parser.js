@@ -107,17 +107,28 @@ function ArrayExpression(ctx) {
 	do {
 		while (ctx.next(','));
 		if (ctx.next(']')) return result;
+
 		if (key = ctx.next(ctx.PROP, ':')) {
 			if (!values.hasOwnProperty(key = key[0].value)) {
 				values[key] = result.length;
 				result.push([Constants.AST_NOP, Expression(ctx), key]);
 			} else result[values[key]][1] = Expression(ctx);
-		} else if (key = Expression(ctx), (typeof key === 'string' || typeof key === 'number') && ctx.next(':')) {
-			if (!values.hasOwnProperty(String(key = key[0].value))) {
+		}
+
+		else if (key = Expression(ctx), (
+			typeof key === 'string' ||
+			typeof key === 'number'
+		) && ctx.next(':')) {
+
+			if (!values.hasOwnProperty(key = String(key))) {
 				values[key] = result.length;
 				result.push([Constants.AST_NOP, Expression(ctx), key]);
 			} else result[values[key]][1] = Expression(ctx);
-		} else result.push([Constants.AST_NOP, key]);
+
+		}
+
+		else result.push([Constants.AST_NOP, key]);
+
 	} while (ctx.next(','));
 	if (!ctx.next(']')) ctx.error(']');
 	return result;

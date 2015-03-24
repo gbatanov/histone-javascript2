@@ -10,7 +10,7 @@ Histone.setResourceLoader(function(requestURI, ret) {
 
 fs.readFile('template.tpl', 'UTF-8', function(error, template) {
 	template = Histone(template);
-	// console.info(JSON.stringify(template.getAST()));
+	console.info(JSON.stringify(template.getAST()));
 	template.render(function(result) {
 		console.info(result);
 	}, 'this-object');
