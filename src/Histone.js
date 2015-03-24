@@ -1,6 +1,5 @@
 var Runtime = require('./Runtime.js'),
-	Template = require('./Template.js'),
-	Constants = require('./Constants.js');
+	Template = require('./Template.js');
 
 function getCallerURI() {
 	var prepareStackTrace = Error.prepareStackTrace;
