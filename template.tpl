@@ -4,4 +4,4 @@
 
 {{'string'}}
 
-{{global->testMethod}}
+{{10->isInt}}
