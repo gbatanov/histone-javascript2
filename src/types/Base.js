@@ -1,13 +1,13 @@
 var Runtime = require('../Runtime.js');
 
-Runtime.register('type', 'isUndefined', false);
-Runtime.register('type', 'isNull', false);
-Runtime.register('type', 'isBoolean', false);
-Runtime.register('type', 'isNumber', false);
-Runtime.register('type', 'isString', false);
-Runtime.register('type', 'isArray', false);
-Runtime.register('type', 'isRegExp', false);
-Runtime.register('type', 'isMacro', false);
-Runtime.register('type', 'toString', '');
-Runtime.register('type', 'toBoolean', false);
-Runtime.register('type', 'toJSON', 'null');
+Runtime.register(Runtime.T_BASE, 'isUndefined', false);
+Runtime.register(Runtime.T_BASE, 'isNull', false);
+Runtime.register(Runtime.T_BASE, 'isBoolean', false);
+Runtime.register(Runtime.T_BASE, 'isNumber', false);
+Runtime.register(Runtime.T_BASE, 'isString', false);
+Runtime.register(Runtime.T_BASE, 'isArray', false);
+Runtime.register(Runtime.T_BASE, 'isRegExp', false);
+Runtime.register(Runtime.T_BASE, 'isMacro', false);
+Runtime.register(Runtime.T_BASE, 'toString', '');
+Runtime.register(Runtime.T_BASE, 'toBoolean', false);
+Runtime.register(Runtime.T_BASE, 'toJSON', 'null');

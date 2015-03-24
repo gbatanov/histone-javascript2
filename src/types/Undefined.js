@@ -1,6 +1,6 @@
 var Runtime = require('../Runtime.js');
 
-Runtime.register('undefined', 'isUndefined', true);
-Runtime.register('undefined', 'toString', '');
-Runtime.register('undefined', 'toBoolean', false);
-Runtime.register('undefined', 'toJSON', 'null');
+Runtime.register(Runtime.T_UNDEFINED, 'isUndefined', true);
+Runtime.register(Runtime.T_UNDEFINED, 'toString', '');
+Runtime.register(Runtime.T_UNDEFINED, 'toBoolean', false);
+Runtime.register(Runtime.T_UNDEFINED, 'toJSON', 'null');

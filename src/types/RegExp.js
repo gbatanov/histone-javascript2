@@ -1,5 +1,5 @@
 var Runtime = require('../Runtime.js');
 
-Runtime.register('RegExp', 'isRegExp', true);
-Runtime.register('RegExp', 'toBoolean', true);
-Runtime.register('RegExp', 'toString', function(self) { return String(self); });
+Runtime.register(Runtime.T_REGEXP, 'isRegExp', true);
+Runtime.register(Runtime.T_REGEXP, 'toBoolean', true);
+Runtime.register(Runtime.T_REGEXP, 'toString', function(self) { return String(self); });

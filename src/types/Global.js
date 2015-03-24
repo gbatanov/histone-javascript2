@@ -5,13 +5,13 @@ var Processor = require('../Processor.js');
 var RESOURCE_CACHE = {};
 
 
-Runtime.register('HistoneGlobal', 'toString', '(Global)');
+Runtime.register(Runtime.T_GLOBAL, 'toString', '(Global)');
 
-Runtime.register('HistoneGlobal', 'getBaseURI', function(self, args, scope) {
+Runtime.register(Runtime.T_GLOBAL, 'getBaseURI', function(self, args, scope) {
 	return scope.getBaseURI();
 });
 
-Runtime.register('HistoneGlobal', 'loadText', function(self, args, scope, ret) {
+Runtime.register(Runtime.T_GLOBAL, 'loadText', function(self, args, scope, ret) {
 	var requestURI = args[0];
 	if (typeof requestURI !== 'string') return ret();
 	requestURI = Runtime.resolveURI(requestURI, scope.getBaseURI());
@@ -25,7 +25,7 @@ Runtime.register('HistoneGlobal', 'loadText', function(self, args, scope, ret) {
 	});
 }, true);
 
-Runtime.register('HistoneGlobal', 'loadJSON', function(self, args, scope, ret) {
+Runtime.register(Runtime.T_GLOBAL, 'loadJSON', function(self, args, scope, ret) {
 	var requestURI = args[0];
 	if (typeof requestURI !== 'string') return ret();
 	requestURI = Runtime.resolveURI(requestURI, scope.getBaseURI());
@@ -43,7 +43,7 @@ Runtime.register('HistoneGlobal', 'loadJSON', function(self, args, scope, ret) {
 	});
 }, true);
 
-Runtime.register('HistoneGlobal', 'require', function(self, args, scope, ret) {
+Runtime.register(Runtime.T_GLOBAL, 'require', function(self, args, scope, ret) {
 	var requestURI = args[0];
 	if (typeof requestURI !== 'string') return ret();
 	requestURI = Runtime.resolveURI(requestURI, scope.getBaseURI());
