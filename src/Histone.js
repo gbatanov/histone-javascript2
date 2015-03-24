@@ -18,21 +18,21 @@ function Histone(template, baseURI) {
 	return new Template(template, baseURI);
 }
 
-Histone.T_BASE = Constants.T_BASE;
-Histone.T_UNDEFINED = Constants.T_UNDEFINED;
-Histone.T_NULL = Constants.T_NULL;
-Histone.T_BOOLEAN = Constants.T_BOOLEAN;
-Histone.T_NUMBER = Constants.T_NUMBER;
-Histone.T_STRING = Constants.T_STRING;
-Histone.T_REGEXP = Constants.T_REGEXP;
-Histone.T_ARRAY = Constants.T_ARRAY;
-Histone.T_MACRO = Constants.T_MACRO;
-Histone.T_GLOBAL = Constants.T_GLOBAL;
+Histone.T_BASE = Runtime.T_BASE;
+Histone.T_UNDEFINED = Runtime.T_UNDEFINED;
+Histone.T_NULL = Runtime.T_NULL;
+Histone.T_BOOLEAN = Runtime.T_BOOLEAN;
+Histone.T_NUMBER = Runtime.T_NUMBER;
+Histone.T_STRING = Runtime.T_STRING;
+Histone.T_REGEXP = Runtime.T_REGEXP;
+Histone.T_ARRAY = Runtime.T_ARRAY;
+Histone.T_MACRO = Runtime.T_MACRO;
+Histone.T_GLOBAL = Runtime.T_GLOBAL;
 
 Histone.register = Runtime.register;
 Histone.setResourceLoader = Runtime.setResourceLoader;
 
-require('./types/Type.js');
+require('./types/Base.js');
 require('./types/Undefined.js');
 require('./types/Null.js');
 require('./types/Boolean.js');
