@@ -1,5 +1,6 @@
 var Constants = require('./Constants.js');
 var Parser = require('./parser/Parser.js');
+var ResolveURI = require('./ResolveURI.js')
 
 var typeInfo = {};
 
@@ -78,10 +79,7 @@ function setResourceLoader(resourceLoader) {
 	RESOURCE_LOADER = resourceLoader;
 }
 
-function resolveURI(relURI, baseURI) {
-	var url = require('url');
-	return url.resolve(baseURI, relURI);
-}
+
 
 function parseTemplate(template, baseURI) {
 	if (typeof template === 'string') {
@@ -116,7 +114,7 @@ module.exports = {
 	call: callAsync,
 	toString: toString,
 	toBoolean: toBoolean,
-	resolveURI: resolveURI,
+	resolveURI: ResolveURI,
 	loadResource: loadResource,
 	parseTemplate: parseTemplate,
 	setResourceLoader: setResourceLoader
