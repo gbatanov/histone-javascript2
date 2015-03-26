@@ -1,5 +1,5 @@
 var fs = require('fs');
-var Histone = require('./src2/Histone.js');
+var Histone = require('./src/Histone.js');
 
 Histone.setResourceLoader(function(requestURI, ret) {
 	console.info('loading', requestURI);
