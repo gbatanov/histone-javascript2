@@ -26,6 +26,14 @@ RTTI.register(RTTI.T_GLOBAL, 'getUniqueId', function(self) {
 	});
 });
 
+RTTI.register(RTTI.T_GLOBAL, 'getRand', function(self, args) {
+	var min = Utils.toInt(args[0]), max = Utils.toInt(args[1]);
+	if (typeof min !== 'number') min = 0;
+	if (typeof max !== 'number') max = Math.pow(2, 32) - 1;
+	if (min > max) { min = [max, max = min][0]; }
+	return Math.floor(Math.random() * (max - min + 1)) + min;
+});
+
 /* @TODO, DEFAULT request params + content-type header */
 RTTI.register(RTTI.T_GLOBAL, 'loadText', function(self, args, scope, ret) {
 	var requestURI = args[0];

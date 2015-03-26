@@ -2,3 +2,4 @@
 
 {{loadText('README.md')->toJSON}}
 
+{{getRand}}
