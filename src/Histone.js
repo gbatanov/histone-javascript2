@@ -13,7 +13,8 @@ function getCallerURI() {
 
 function Histone(template, baseURI) {
 	if (typeof baseURI !== 'string') baseURI = getCallerURI();
-	template = Runtime.parseTemplate(template, baseURI);
+	if (template instanceof Template) template = template.getAST();
+	else template = Runtime.parseTemplate(template, baseURI);
 	return new Template(template, baseURI);
 }
 
