@@ -1,5 +1,7 @@
-{{macro foo}}
-	HELLO
+{{macro inputText}}
+	inputText
 {{/macro}}
 
-{{return foo}}
+{{return [
+	inputText: inputText
+]}}
