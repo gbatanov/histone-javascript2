@@ -45,13 +45,15 @@ function forEachAsync(list, iterator, ret, start, step) {
 
 function toNumber(value) {
 
-	if (typeof value === 'number')
-		return value;
+	if (typeof value === 'number') return value;
 
-	value = parseFloat(value);
-	if (!isNaN(value) && isFinite(value)) {
-		return value;
+	if (typeof value === 'string') {
+		value = parseFloat(value);
+		if (!isNaN(value) && isFinite(value)) {
+			return value;
+		}
 	}
+
 
 }
 

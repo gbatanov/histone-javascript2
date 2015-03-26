@@ -8,7 +8,20 @@ RTTI.register(RTTI.T_NUMBER, 'toBoolean', function(self) {
 });
 
 RTTI.register(RTTI.T_NUMBER, 'toString', function(self) {
-	return String(self);
+	var value = String(self).split(/[eE]/);
+	if (value.length === 1) return value[0];
+	var result = '';
+	var numeric = value[0].replace('.', '');
+	var exponent = Number(value[1]) + 1;
+	if (exponent < 0) {
+		if (self < 0) result += '-';
+		result += '0.';
+		while (exponent++) result += '0';
+		return result + numeric.replace(/^\-/,'');
+	}
+	exponent -= numeric.length;
+	while (exponent--) result += '0';
+	return numeric + result;
 });
 
 RTTI.register(RTTI.T_NUMBER, 'toJSON', function(self) {
@@ -40,10 +53,14 @@ RTTI.register(RTTI.T_NUMBER, 'isFloat', function(self) {
 });
 
 RTTI.register(RTTI.T_NUMBER, 'toChar', function(self) {
-	return String.fromCharCode(self);
+	var value = Utils.toInt(self);
+	if (typeof value === 'number' && value >= 0) {
+		return String.fromCharCode(self);
+	}
 });
 
 RTTI.register(RTTI.T_NUMBER, 'toFixed', function(self, args) {
 	var digits = Utils.toInt(args[0]);
-	return (digits !== undefined && digits >= 0 ? self.toFixed(digits) : self);
+	if (typeof digits !== 'number') digits = 0;
+	return (digits >= 0 ? self.toFixed(digits) : self);
 });

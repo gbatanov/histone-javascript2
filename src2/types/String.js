@@ -2,9 +2,18 @@ var RTTI = require('../RTTI.js'),
 	Utils = require('../Utils.js');
 
 RTTI.register(RTTI.T_STRING, 'isString', true);
-RTTI.register(RTTI.T_STRING, 'toString', function(self) { return self; });
-RTTI.register(RTTI.T_STRING, 'toBoolean', function(self) { return self.length > 0; });
-RTTI.register(RTTI.T_STRING, 'toJSON', function(self) { return JSON.stringify(self); });
+
+RTTI.register(RTTI.T_STRING, 'toBoolean', function(self) {
+	return self.length > 0;
+});
+
+RTTI.register(RTTI.T_STRING, 'toString', function(self) {
+	return self;
+});
+
+RTTI.register(RTTI.T_STRING, 'toJSON', function(self) {
+	return JSON.stringify(self);
+});
 
 RTTI.register(RTTI.T_STRING, RTTI.GET, function(self, args) {
 	var index = Utils.toInt(args[0]);
@@ -17,7 +26,7 @@ RTTI.register(RTTI.T_STRING, RTTI.GET, function(self, args) {
 	}
 });
 
-RTTI.register(RTTI.T_STRING, 'size', function(self) {
+RTTI.register(RTTI.T_STRING, 'length', function(self) {
 	return self.length;
 });
 
@@ -31,14 +40,13 @@ RTTI.register(RTTI.T_STRING, 'toUpperCase', function(self) {
 
 RTTI.register(RTTI.T_STRING, 'split', function(self, args) {
 	var separator = args[0];
-	if (typeof separator !== 'string')
-		separator = '';
+	if (typeof separator !== 'string') separator = '';
 	return self.split(separator);
 });
 
 RTTI.register(RTTI.T_STRING, 'charCodeAt', function(self, args) {
 	var index = Utils.toInt(args[0]);
-	if (index !== undefined) {
+	if (typeof index === 'number') {
 		var length = self.length;
 		if (index < 0) index = length + index;
 		if (index >= 0 && index < length) {
@@ -49,11 +57,11 @@ RTTI.register(RTTI.T_STRING, 'charCodeAt', function(self, args) {
 
 RTTI.register(RTTI.T_STRING, 'toNumber', function(self, args) {
 	self = Utils.toNumber(self);
-	return (self === undefined ? args[0] : self);
+	return (typeof self === 'undefined' ? args[0] : self);
 });
 
 RTTI.register(RTTI.T_STRING, 'strip', function(self, args) {
-	var chars = '', arg, start = -1, length = self.length;
+	var arg, chars = '', start = -1, length = self.length;
 	while (args.length) if (typeof (arg = args.shift()) === 'string') chars += arg;
 	if (chars.length === 0) chars = ' \n\r\t';
 	while (start < length && chars.indexOf(self.charAt(++start)) !== -1);
