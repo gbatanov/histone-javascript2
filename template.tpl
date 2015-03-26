@@ -1,9 +1,4 @@
-{{macro foo(a)}}
-	{{self->toJSON}}
-{{/macro}}
+{{10 + 30}}
 
-{{foo()}}
+{{loadText('README.md')->toJSON}}
 
-{{var ui = require('ui.tpl')}}
-
-{{ui.inputText()}}
