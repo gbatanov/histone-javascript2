@@ -59,21 +59,11 @@ function processTernary(node, scope, ret) {
 	});
 }
 
-
-
 function processEquality(node, scope, ret) {
 	processNode(node[1], scope, function(left) {
 		processNode(node[2], scope, function(right) {
 			var result = RTTI.processEquality(left, right);
 			ret(node[0] === Constants.AST_EQ ? result : !result);
-		});
-	});
-}
-
-function processArithmetical(node, scope, ret) {
-	processNode(node[1], scope, function(left) {
-		processNode(node[2], scope, function(right) {
-			ret(RTTI.processArithmetical(node[0], left, right));
 		});
 	});
 }
@@ -89,6 +79,22 @@ function processRelational(node, scope, ret) {
 function processUnaryMinus(node, scope, ret) {
 	processNode(node[1], scope, function(value) {
 		ret(RTTI.processUnaryMinus(value));
+	});
+}
+
+function processAddition(node, scope, ret) {
+	processNode(node[1], scope, function(left) {
+		processNode(node[2], scope, function(right) {
+			ret(RTTI.processAddition(left, right));
+		});
+	});
+}
+
+function processArithmetical(node, scope, ret) {
+	processNode(node[1], scope, function(left) {
+		processNode(node[2], scope, function(right) {
+			ret(RTTI.processArithmetical(node[0], left, right));
+		});
 	});
 }
 
@@ -239,6 +245,8 @@ function processNode(node, scope, retn, retf) {
 			processEquality(node, scope, retn); break;
 
 		case Constants.AST_ADD:
+			processAddition(node, scope, retn); break;
+
 		case Constants.AST_SUB:
 		case Constants.AST_MUL:
 		case Constants.AST_DIV:
@@ -286,7 +294,7 @@ function Runtime(baseURI, thisObj) {
 	this.parent = null;
 	this.variables = {};
 	this.baseURI = baseURI;
-	this.thisObj = thisObj;
+	this.thisObj = RTTI_toHistone(thisObj);
 }
 
 Runtime.prototype.getBaseURI = function() {

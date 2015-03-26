@@ -30,7 +30,7 @@ RTTI.register(RTTI.T_MACRO, RTTI.CALL, function(self, args, scope, ret) {
 
 	macroScope.process(self.body, ret);
 
-}, true);
+});
 
 RTTI.register(RTTI.T_MACRO, 'bind', function(self, args) {
 	return self.bind(args);

@@ -102,7 +102,7 @@ RTTI.register(RTTI.T_ARRAY, 'every', function(self, args, scope, ret) {
 			});
 		}, function() { ret(!result); });
 	} else ret(false);
-}, true);
+});
 
 RTTI.register(RTTI.T_ARRAY, 'some', function(self, args, scope, ret) {
 	var filter = args.shift();
@@ -114,7 +114,7 @@ RTTI.register(RTTI.T_ARRAY, 'some', function(self, args, scope, ret) {
 			});
 		}, function() { ret(result); });
 	} else ret(false);
-}, true);
+});
 
 RTTI.register(RTTI.T_ARRAY, 'filter', function(self, args, scope, ret) {
 	var filter = args.shift();
@@ -127,7 +127,7 @@ RTTI.register(RTTI.T_ARRAY, 'filter', function(self, args, scope, ret) {
 			});
 		}, function() { ret(result); });
 	} else ret([]);
-}, true);
+});
 
 RTTI.register(RTTI.T_ARRAY, 'map', function(self, args, scope, ret) {
 	var filter = args.shift(), keys = self.keys, result = new Array(keys.length);
@@ -139,4 +139,4 @@ RTTI.register(RTTI.T_ARRAY, 'map', function(self, args, scope, ret) {
 			});
 		}, function() { ret(result); });
 	} else ret(result);
-}, true);
+});

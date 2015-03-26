@@ -1,4 +1,5 @@
 var Utils = require('./Utils.js');
+var Constants = require('./Constants.js');
 var HistoneMacro = require('./Macro.js');
 var HistoneArray = require('./Array.js');
 var isNumeric = Utils.isNumeric;
@@ -11,6 +12,17 @@ var globalObject = new HistoneGlobal();
 
 
 var REGISTERED_TYPES = {
+
+	'base': {},
+	'undefined': {},
+	'null': {},
+	'boolean': {},
+	'number': {},
+	'string': {},
+	'RegExp': {},
+	'HistoneMacro': {},
+	'HistoneArray': {},
+	'HistoneGlobal': {}
 
 };
 
@@ -47,34 +59,6 @@ function getMember(value, member) {
 
 }
 
-function toHistone(value) {
-
-	if (!REGISTERED_TYPES.hasOwnProperty(getType(value))) {
-
-		if (value instanceof Array) {
-			var result = new HistoneArray();
-			for (var c = 0; c < value.length; c++)
-				result.push(toHistone(value[c]));
-			return result;
-		}
-
-		else if (value instanceof Object) {
-			var result = new HistoneArray();
-			for (var key in value) {
-				if (value.hasOwnProperty(key)) {
-					result.push(toHistone(value[key]), key);
-				}
-			}
-			return result;
-		}
-
-		else value = undefined;
-
-	}
-
-	return value;
-
-}
 
 function callSync(value, method, args, scope) {
 	var result = getMember(value, method);
@@ -88,7 +72,9 @@ function callAsync(value, method, args, scope, ret) {
 
 	if (typeof result === 'function') {
 
-		if (!result.async) {
+		// console.info(method, result.length);
+
+		if (result.length < 4) {
 
 			result = result(value, args, scope);
 			result = toHistone(result);
@@ -102,6 +88,7 @@ function callAsync(value, method, args, scope, ret) {
 	} else ret(result);
 
 }
+
 
 
 function toString(value) {
@@ -135,32 +122,61 @@ function newMacro(params, body, scope) {
 }
 
 
-function register(type, member, value, async) {
-	if (!REGISTERED_TYPES.hasOwnProperty(type))
-		REGISTERED_TYPES[type] = {};
-	REGISTERED_TYPES[type][member] = value;
-	if (typeof value === 'function' && async) {
-		value.async = true;
+function processEquality(left, right) {
+
+	if (typeof left === 'string' && typeof right === 'number') {
+		if (isNumeric(left)) left = parseFloat(left);
+		else right = toString(right);
 	}
-}
 
+	else if (typeof left === 'number' && typeof right === 'string') {
+		if (isNumeric(right)) right = parseFloat(right);
+		else left = toString(left);
+	}
 
-function processArithmetical(type, left, right) {
 	if (!(typeof left === 'string' && typeof right === 'string')) {
-		if (typeof left === 'number' || typeof right === 'number') {
-			if (isNumeric(left)) left = parseFloat(left);
-			if (typeof left !== 'number') return;
-			if (isNumeric(right)) right = parseFloat(right);
-			if (typeof right !== 'number') return;
-			return (left + right);
-		} else if (left instanceof HistoneArray &&
-			right instanceof HistoneArray) {
-			var result = left.clone();
-			result = result.concat(right);
-			return result;
+		if (typeof left === 'number' && typeof right === 'number') {
+			left = parseFloat(left);
+			right = parseFloat(right);
+		} else {
+			left = toBoolean(left);
+			right = toBoolean(right);
 		}
 	}
-	return toString(left) + toString(right);
+
+	return (left === right);
+
+}
+
+function processRelational(type, left, right) {
+
+	if (typeof left === 'string' && typeof right === 'number') {
+		if (isNumeric(left)) left = parseFloat(left);
+		else right = toString(right);
+	}
+
+	else if (typeof left === 'number' && typeof right === 'string') {
+		if (isNumeric(right)) right = parseFloat(right);
+		else left = toString(left);
+	}
+
+	if (!(typeof left === 'number' && typeof right === 'number')) {
+		if (typeof left === 'string' && typeof right === 'string') {
+			left = left.length;
+			right = right.length;
+		} else {
+			left = toBoolean(left);
+			right = toBoolean(right);
+		}
+	}
+
+	switch (type) {
+		case Constants.AST_LT: return (left < right);
+		case Constants.AST_GT: return (left > right);
+		case Constants.AST_LE: return (left <= right);
+		case Constants.AST_GE: return (left >= right);
+	}
+
 }
 
 function processUnaryMinus(value) {
@@ -168,14 +184,47 @@ function processUnaryMinus(value) {
 	if (typeof value === 'number') return (-value);
 }
 
-function setResourceLoader(resourceLoader) {
-	if (typeof resourceLoader !== 'function') return;
-	RESOURCE_LOADER = resourceLoader;
+
+
+function processArithmetical(type, left, right) {
+
+	if (isNumeric(left)) left = parseFloat(left);
+	if (typeof left !== 'number') return;
+
+	if (isNumeric(right)) right = parseFloat(right);
+	if (typeof right !== 'number') return;
+
+	switch (type) {
+		case Constants.AST_SUB: return (left - right);
+		case Constants.AST_MUL: return (left * right);
+		case Constants.AST_DIV: return (left / right);
+		case Constants.AST_MOD: return (left % right);
+	}
+
 }
 
-function loadResource(resouceURI, ret) {
-	if (typeof RESOURCE_LOADER !== 'function') ret();
-	else RESOURCE_LOADER(resouceURI, ret);
+function processAddition(left, right) {
+	// console.info(left, '+', right)
+
+
+
+	if (!(typeof left === 'string' || typeof right === 'string')) {
+
+		if (isNumeric(left) || isNumeric(right)) {
+			if (isNumeric(left)) left = parseFloat(left);
+			if (typeof left !== 'number') return;
+			if (isNumeric(right)) right = parseFloat(right);
+			if (typeof right !== 'number') return;
+			return (left + right);
+		}
+
+		if (left instanceof HistoneArray &&
+			right instanceof HistoneArray) {
+			return array_merge($left, $right);
+		}
+	}
+
+	return (toString(left) + toString(right));
 }
 
 function iterate(collection, retn, retf) {
@@ -189,6 +238,47 @@ function iterate(collection, retn, retf) {
 
 	} else return true;
 
+}
+
+
+function toHistone(value) {
+	var type = getType(value);
+	if (!REGISTERED_TYPES.hasOwnProperty(type)) {
+		if (type === 'Array') {
+			var result = new HistoneArray();
+			for (var c = 0; c < value.length; c++)
+				result.push(toHistone(value[c]));
+			return result;
+		} else if (type === 'Object') {
+			var result = new HistoneArray();
+			for (var key in value) {
+				if (value.hasOwnProperty(key)) {
+					result.push(toHistone(value[key]), key);
+				}
+			}
+			return result;
+		} else value = undefined;
+	}
+	return value;
+}
+
+function register(type, member, value) {
+	if (typeof value !== 'function')
+		value = toHistone(value);
+	if (typeof value === 'undefined') return;
+	if (!REGISTERED_TYPES.hasOwnProperty(type))
+		REGISTERED_TYPES[type] = {};
+	REGISTERED_TYPES[type][member] = value;
+}
+
+function setResourceLoader(resourceLoader) {
+	if (typeof resourceLoader !== 'function') return;
+	RESOURCE_LOADER = resourceLoader;
+}
+
+function loadResource(resouceURI, ret) {
+	if (typeof RESOURCE_LOADER !== 'function') ret();
+	else RESOURCE_LOADER(resouceURI, ret);
 }
 
 module.exports = {
@@ -208,24 +298,27 @@ module.exports = {
 	T_GLOBAL: 'HistoneGlobal',
 
 
+	processAddition: processAddition,
+	processEquality: processEquality,
+	processRelational: processRelational,
 	processArithmetical: processArithmetical,
 	processUnaryMinus: processUnaryMinus,
 
 	toString: toString,
 	toBoolean: toBoolean,
 	toJSON: toJSON,
-	toHistone: toHistone,
 	iterate: iterate,
 
 	callSync: callSync,
 	callAsync: callAsync,
 
-	register: register,
-
 	getGlobal: getGlobal,
 	newArray: newArray,
 	newMacro: newMacro,
 
+	toHistone: toHistone,
+	register: register,
 	setResourceLoader: setResourceLoader,
 	loadResource: loadResource
+
 };

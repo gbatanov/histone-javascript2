@@ -1,4 +1,5 @@
 var RTTI = require('./RTTI.js'),
+	Utils = require('./Utils.js'),
 	Runtime = require('./Runtime.js'),
 	Template = require('./Template.js');
 
@@ -13,7 +14,9 @@ function getCallerURI() {
 }
 
 function Histone(template, baseURI) {
-	if (typeof baseURI !== 'string') baseURI = getCallerURI();
+	var callerURI = getCallerURI();
+	if (typeof baseURI !== 'string') baseURI = callerURI;
+	else baseURI = Utils.resolveURI(baseURI, callerURI);
 	if (template instanceof Template) template = template.getAST();
 	else template = Runtime.parseTemplate(template, baseURI);
 	return new Template(template, baseURI);

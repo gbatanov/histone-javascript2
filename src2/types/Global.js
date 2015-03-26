@@ -39,7 +39,7 @@ RTTI.register(RTTI.T_GLOBAL, 'loadText', function(self, args, scope, ret) {
 		result = (typeof result === 'string' ? result : undefined);
 		ret(RESOURCE_CACHE[cacheKey] = result);
 	});
-}, true);
+});
 
 RTTI.register(RTTI.T_GLOBAL, 'loadJSON', function(self, args, scope, ret) {
 	var requestURI = args[0];
@@ -57,7 +57,7 @@ RTTI.register(RTTI.T_GLOBAL, 'loadJSON', function(self, args, scope, ret) {
 		} catch (exception) {}
 		ret(RESOURCE_CACHE[cacheKey] = undefined);
 	});
-}, true);
+});
 
 RTTI.register(RTTI.T_GLOBAL, 'require', function(self, args, scope, ret) {
 	var requestURI = args[0];
@@ -89,4 +89,4 @@ RTTI.register(RTTI.T_GLOBAL, 'require', function(self, args, scope, ret) {
 		runtime.process(template, ret);
 	});
 
-}, true);
+});
