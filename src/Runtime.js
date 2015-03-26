@@ -1,6 +1,7 @@
 var Constants = require('./Constants.js');
 var Parser = require('./parser/Parser.js');
-var ResolveURI = require('./ResolveURI.js')
+var ResolveURI = require('./ResolveURI.js');
+var HistoneArray = require('./Array.js');
 
 var typeInfo = {};
 
@@ -19,6 +20,17 @@ function register(type, member, value, async) {
 	typeInfo[type][member] = value;
 }
 
+function getType(value) {
+	var type = (typeof value);
+	if (type === 'number') {
+		if (isNaN(value) || !isFinite(value))
+			type = 'undefined';
+	} else if (type === 'object') {
+		if (value === null) type = 'null';
+		else type = value.constructor.name;
+	}
+	return type;
+}
 
 function getHandler(value, member) {
 
@@ -44,6 +56,35 @@ function getHandler(value, member) {
 }
 
 
+function toHistone(value) {
+
+	if (!typeInfo.hasOwnProperty(getType(value))) {
+
+		if (value instanceof Array) {
+			var result = new HistoneArray();
+			for (var c = 0; c < value.length; c++)
+				result.set(toHistone(value[c]));
+			return result;
+		}
+
+		else if (value instanceof Object) {
+			var result = new HistoneArray();
+			for (var key in value) {
+				if (value.hasOwnProperty(key)) {
+					result.set(toHistone(value[key]), key);
+				}
+			}
+			return result;
+		}
+
+		else value = undefined;
+
+	}
+
+	return value;
+
+}
+
 function callSync(value, member, args, scope) {
 	var handler = getHandler(value, member);
 	if (typeof handler === 'function')
@@ -53,11 +94,24 @@ function callSync(value, member, args, scope) {
 
 function callAsync(value, member, args, scope, ret) {
 	var handler = getHandler(value, member);
+
 	if (typeof handler === 'function') {
-		if (handler.async)
-			handler(value, args, scope, ret);
-		else ret(handler(value, args, scope));
+
+		if (handler.async) {
+			handler(value, args, scope, function(result) {
+				result = toHistone(result);
+				ret(result);
+			});
+		}
+
+		else {
+			var result = handler(value, args, scope);
+			result = toHistone(result);
+			ret(result);
+		}
+
 	} else ret(handler);
+
 }
 
 
@@ -67,6 +121,10 @@ function toString(node) {
 
 function toBoolean(node) {
 	return callSync(node, 'toBoolean');
+}
+
+function toJSON(node) {
+	return callSync(node, 'toJSON');
 }
 
 function loadResource(resouceURI, ret) {
@@ -82,17 +140,19 @@ function setResourceLoader(resourceLoader) {
 
 
 function parseTemplate(template, baseURI) {
+
 	if (typeof template === 'string') {
 		if (TPL_REGEXP.test(template)) try {
 			return JSON.parse(template);
 		} catch (exception) {}
 		return Parser(template, baseURI);
 	}
+
 	if (template instanceof Array)
 		return template;
-	if (template instanceof Template)
-		return template.getAST();
+
 	return [Constants.AST_NODES];
+
 }
 
 
@@ -110,10 +170,13 @@ module.exports = {
 	T_MACRO: 'HistoneMacro',
 	T_GLOBAL: 'HistoneGlobal',
 
-	register: register,
-	call: callAsync,
+	toJSON: toJSON,
 	toString: toString,
 	toBoolean: toBoolean,
+	toHistone: toHistone,
+
+	register: register,
+	call: callAsync,
 	resolveURI: ResolveURI,
 	loadResource: loadResource,
 	parseTemplate: parseTemplate,
