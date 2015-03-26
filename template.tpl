@@ -1,1 +1,9 @@
-{{[1, 2, 3, 4]->isArray}}
+{{macro foo(a)}}
+	{{self->toJSON}}
+{{/macro}}
+
+{{foo()}}
+
+{{var ui = require('ui.tpl')}}
+
+{{ui.inputText()}}
