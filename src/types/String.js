@@ -7,3 +7,10 @@ Runtime.register(Runtime.T_STRING, 'toJSON', function(self) { return JSON.string
 Runtime.register(Runtime.T_STRING, 'size', function(self) { return self.length; });
 Runtime.register(Runtime.T_STRING, 'toLowerCase', function(self) { return self.toLowerCase(); });
 Runtime.register(Runtime.T_STRING, 'toUpperCase', function(self) { return self.toUpperCase(); });
+
+Runtime.register(Runtime.T_STRING, 'split', function(self, args) {
+	var separator = args[0];
+	if (typeof separator !== 'string')
+		separator = '';
+	return self.split(separator);
+});

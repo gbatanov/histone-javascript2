@@ -26,11 +26,11 @@ Runtime.register(Runtime.T_MACRO, '__call', function(self, args, scope, ret) {
 		macroScope = self.scope.extend(),
 		callArgs = (self.args || []).concat(args);
 
-	scope.putVar('self', {
+	macroScope.putVar(Runtime.toHistone({
 		callee: self,
 		caller: scope.getBaseURI(),
 		arguments: callArgs
-	});
+	}), 0);
 
 	for (var c = 0; c < macroParams.length; c++) {
 		if (callArgs[c] === undefined)
