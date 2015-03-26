@@ -1,39 +1,10 @@
 var Utils = require('./Utils.js');
+var HistoneMacro = require('./Macro.js');
+var HistoneArray = require('./Array.js');
 var isNumeric = Utils.isNumeric;
+var forEachAsync = Utils.forEachAsync;
 
 var RESOURCE_LOADER = null;
-
-function HistoneMacro(params, body, scope) {
-	this.params = params;
-	this.body = body;
-	this.scope = scope;
-}
-
-
-function HistoneArray() {
-	this.keys = [];
-	this.values = [];
-	this.nextIndex = 0;
-}
-
-HistoneArray.prototype.push = function(value, key) {
-	if (typeof key === 'undefined') {
-
-		key = String(this.nextIndex++);
-		this.keys.push(key);
-		this.values.push(value);
-
-	}
-
-	else if (typeof key === 'string') {
-		this.keys.push(key);
-		this.values.push(value);
-	}
-
-	else {
-		throw 'x';
-	}
-};
 
 function HistoneGlobal() {}
 var globalObject = new HistoneGlobal();
@@ -105,10 +76,10 @@ function toHistone(value) {
 
 }
 
-function callSync(value, method) {
+function callSync(value, method, args, scope) {
 	var result = getMember(value, method);
 	if (typeof result === 'function') {
-		return result(value);
+		return result(value, args, scope);
 	} else return result;
 }
 
@@ -152,14 +123,14 @@ function getGlobal() {
 	return globalObject;
 }
 
-function getArray(items) {
+function newArray(items) {
 	var array = new HistoneArray();
 	for (var c = 0; c < items.length; c++)
 		array.push(items[c][0], items[c][1]);
 	return array;
 }
 
-function getMacro(params, body, scope) {
+function newMacro(params, body, scope) {
 	return new HistoneMacro(params, body, scope);
 }
 
@@ -207,6 +178,19 @@ function loadResource(resouceURI, ret) {
 	else RESOURCE_LOADER(resouceURI, ret);
 }
 
+function iterate(collection, retn, retf) {
+
+	if (collection instanceof HistoneArray && collection.values.length) {
+		var keys = collection.keys, index = 0, last = collection.values.length - 1;
+
+		forEachAsync(collection.values, function(value, next, index) {
+			retn(value, next, keys[index], index, last);
+		}, retf);
+
+	} else return true;
+
+}
+
 module.exports = {
 
 	GET: 0,
@@ -231,14 +215,16 @@ module.exports = {
 	toBoolean: toBoolean,
 	toJSON: toJSON,
 	toHistone: toHistone,
+	iterate: iterate,
 
+	callSync: callSync,
 	callAsync: callAsync,
 
 	register: register,
 
 	getGlobal: getGlobal,
-	getArray: getArray,
-	getMacro: getMacro,
+	newArray: newArray,
+	newMacro: newMacro,
 
 	setResourceLoader: setResourceLoader,
 	loadResource: loadResource

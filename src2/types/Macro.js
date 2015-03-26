@@ -1,9 +1,14 @@
-var RTTI = require('../RTTI.js');
+var RTTI = require('../RTTI.js'),
+	HistoneArray = require('../Array.js'),
+	HistoneMacro = require('../Macro.js');
 
 RTTI.register(RTTI.T_MACRO, 'isMacro', true);
 RTTI.register(RTTI.T_MACRO, 'toBoolean', true);
 RTTI.register(RTTI.T_MACRO, 'toString', '(Macro)');
 
+RTTI.register(RTTI.T_MACRO, RTTI.GET, function(self, args) {
+	return RTTI.callSync(self.props, RTTI.GET, args);
+});
 
 RTTI.register(RTTI.T_MACRO, RTTI.CALL, function(self, args, scope, ret) {
 
@@ -26,3 +31,15 @@ RTTI.register(RTTI.T_MACRO, RTTI.CALL, function(self, args, scope, ret) {
 	macroScope.process(self.body, ret);
 
 }, true);
+
+RTTI.register(RTTI.T_MACRO, 'bind', function(self, args) {
+	return self.bind(args);
+});
+
+RTTI.register(RTTI.T_MACRO, 'extend', function(self, args) {
+	if (args.length > 0) {
+		self = self.clone();
+		self.props = args[0];
+	}
+	return self;
+});
