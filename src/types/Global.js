@@ -7,12 +7,13 @@ var RTTI = require('../RTTI.js'),
 	Utils_toInt = Utils.toInt,
 	Utils_resolveURI = Utils.resolveURI;
 
-var RESOURCE_CACHE = {};
 var WEEK_DAYS_SHORT = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
 var WEEK_DAYS_LONG = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'];
 var MONTH_NAMES_SHORT = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];
 var MONTH_NAMES_LONG = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
 
+
+var RESOURCE_CACHE = {};
 
 function getCache(cacheKey, load, process) {
 	if (cacheKey) cacheKey = JSON.stringify(cacheKey);
