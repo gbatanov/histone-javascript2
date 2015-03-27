@@ -170,41 +170,7 @@ function mergeStrings(nodes) {
 	}
 }
 
-function xOptimize(node, cb) {
-
-	node = cb(node);
-	if (node instanceof Array) {
-		for (var c = 0; c < node.length; c++) {
-			node[c] = xOptimize(node[c], cb);
-		}
-	}
-
-	return node;
-
-
-
-}
-
 module.exports = function(node) {
 	while (removeUnusedVars(node, getUsedVars(node)));
 	mergeStrings(node);
-
-	/*
-	return xOptimize(node, function(node) {
-
-		if (node instanceof Array && node.length === 2 && (
-			node[0] === Constants.AST_NODES ||
-			node[0] === Constants.AST_NODELIST
-		)) {
-
-			return node[1];
-
-
-		}
-
-		else return node;
-
-	});
-*/
-
 };
