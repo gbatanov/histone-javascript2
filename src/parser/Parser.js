@@ -547,11 +547,6 @@ function setReference(name, scopeChain) {
 	return lastScope[name];
 }
 
-function array_key_exists(key, array) {
-	return (typeof array[key] !== 'undefined');
-}
-
-
 
 function markReferences(node, scopeChain) {
 
@@ -585,7 +580,7 @@ function markReferences(node, scopeChain) {
 
 			for (var c = 5; c < node.length; c += 2) {
 				markReferences(node[c], scopeChain);
-				if (!array_key_exists(c + 1, node)) break;
+				if (typeof node[c + 1] === 'undefined') break;
 				markReferences(node[c + 1], scopeChain);
 			}
 
@@ -597,7 +592,7 @@ function markReferences(node, scopeChain) {
 
 			for (var c = 4; c < node.length; ++c) {
 				var param = node[c];
-				if (!array_key_exists(2, param)) continue;
+				if (typeof node[2] === 'undefined') continue;
 				markReferences(param[2], scopeChain);
 			}
 
@@ -607,12 +602,12 @@ function markReferences(node, scopeChain) {
 			scopeChain.push({});
 			setReference('self', scopeChain);
 
-			if (array_key_exists(3, node)) {
+			if (typeof node[3] !== 'undefined') {
 				var paramList = [];
 				for (var c = 4; c < node.length; c++) {
 					var param = node[c];
 					setReference(param[1], scopeChain);
-					if (array_key_exists(2, param)) {
+					if (typeof param[2] !== 'undefined') {
 						paramList.push(c - 4);
 						paramList.push(param[2]);
 					}
