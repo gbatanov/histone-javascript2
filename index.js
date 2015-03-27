@@ -1,5 +1,5 @@
 var fs = require('fs');
-var Histone = require('./src/Histone.js');
+var Histone = require('./src/Histone');
 
 Histone.setResourceLoader(function(requestURI, ret) {
 	console.info('loading', requestURI);
@@ -7,7 +7,6 @@ Histone.setResourceLoader(function(requestURI, ret) {
 		ret(template);
 	});
 });
-
 
 fs.readFile('template.tpl', 'UTF-8', function(error, template) {
 	template = Histone(template);
