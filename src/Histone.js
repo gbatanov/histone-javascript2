@@ -1,6 +1,8 @@
 var RTTI = require('./RTTI'),
 	Utils = require('./Utils'),
 	Template = require('./Template'),
+	HistoneArray = require('./Array'),
+	HistoneMacro = require('./Macro'),
 	Processor = require('./Processor'),
 	Parser = require('./parser/Parser');
 
@@ -26,6 +28,8 @@ function Histone(template, baseURI) {
 Histone.RTTI = RTTI;
 Histone.Utils = Utils;
 Histone.Parser = Parser;
+Histone.Array = HistoneArray;
+Histone.Macro = HistoneMacro;
 Histone.Processor = Processor;
 
 Histone.setResourceLoader = RTTI.setResourceLoader;
