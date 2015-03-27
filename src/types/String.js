@@ -1,5 +1,6 @@
 var RTTI = require('../RTTI.js'),
 	Utils = require('../Utils.js'),
+	HistoneMacro = require('../Macro'),
 	RTTI_register = RTTI.register,
 	RTTI_T_STRING = RTTI.T_STRING,
 	Utils_toInt = Utils.toInt;
@@ -84,4 +85,47 @@ RTTI_register(RTTI_T_STRING, 'slice', function(self, args) {
 	if (length < 0) length = strlen - start + length;
 	if (length <= 0) return '';
 	return self.substr(start, length);
+});
+
+RTTI_register(RTTI_T_STRING, 'replace', function(self, args, scope, ret) {
+
+	var search = args[0], replace = args[1];
+
+	if (typeof search === 'string') {
+		search = search.replace(REGEXP_ESCAPE, '\\$1');
+		search = new RegExp(search, 'g');
+	}
+
+	if (!(search instanceof RegExp)) return ret(self);
+
+	if (!(replace instanceof HistoneMacro)) {
+		replace = RTTI.toString(replace);
+		return ret(self.replace(search, replace));
+	}
+
+
+	var result = '', lastPos = 0;
+	Utils.loopAsync(function(next) {
+
+		var match = search.exec(self);
+
+		if (match) {
+
+			if (lastPos < match.index)
+				result += self.slice(lastPos, match.index);
+
+			lastPos = match.index + match[0].length;
+
+			replace.call([match[0]], scope, function(replace) {
+				result += replace;
+				next();
+			});
+
+
+
+
+		} else next(true);
+
+	}, function() { ret(result); });
+
 });

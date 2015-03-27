@@ -42,6 +42,29 @@ function forEachAsync(list, iterator, ret, start, step) {
 	resume();
 }
 
+function loopAsync(iterator, ret) {
+
+	var calls = 0, looping = false;
+
+	var resume = function() {
+		calls += 1;
+		if (looping) return;
+		looping = true;
+
+		while (calls > 0) {
+			calls -= 1;
+			iterator(function(stop) {
+				if (stop === true) ret();
+				else resume();
+			});
+		}
+		looping = false;
+	};
+
+	resume();
+
+}
+
 
 function toNumber(value) {
 
@@ -187,5 +210,6 @@ module.exports = {
 	toNumber: toNumber,
 	isNumeric: isNumeric,
 	resolveURI: resolveURI,
+	loopAsync: loopAsync,
 	forEachAsync: forEachAsync
 };
