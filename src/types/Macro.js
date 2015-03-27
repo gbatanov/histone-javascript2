@@ -1,5 +1,5 @@
-var RTTI = require('../RTTI.js'),
-	HistoneArray = require('../Array.js'),
+var RTTI = require('../RTTI'),
+	HistoneArray = require('../Array'),
 	RTTI_register = RTTI.register,
 	RTTI_T_MACRO = RTTI.T_MACRO;
 

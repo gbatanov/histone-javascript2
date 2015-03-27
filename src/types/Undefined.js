@@ -1,4 +1,4 @@
-var RTTI = require('../RTTI.js'),
+var RTTI = require('../RTTI'),
 	RTTI_register = RTTI.register,
 	RTTI_T_UNDEFINED = RTTI.T_UNDEFINED;
 

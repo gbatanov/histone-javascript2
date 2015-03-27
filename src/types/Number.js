@@ -1,5 +1,5 @@
-var RTTI = require('../RTTI.js'),
-	Utils = require('../Utils.js'),
+var RTTI = require('../RTTI'),
+	Utils = require('../Utils'),
 	RTTI_register = RTTI.register,
 	RTTI_T_NUMBER = RTTI.T_NUMBER,
 	Utils_toInt = Utils.toInt;

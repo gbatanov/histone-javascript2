@@ -1,5 +1,5 @@
-var RTTI = require('../RTTI.js'),
-	Utils = require('../Utils.js'),
+var RTTI = require('../RTTI'),
+	Utils = require('../Utils'),
 	HistoneMacro = require('../Macro'),
 	RTTI_register = RTTI.register,
 	RTTI_T_STRING = RTTI.T_STRING,
