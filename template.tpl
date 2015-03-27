@@ -1,3 +1,14 @@
+{{macro foo}}
+	{{self->toJSON}}
+{{/macro}}
+
+{{[
+
+	foo: 'bar',
+	x: 'y'
+
+]->toJSON}}
+
 {{macro inputText}}
 	HELLO = {{self.arguments->toJSON}}
 {{/macro}}
@@ -21,7 +32,7 @@
 {{/macro}}
 
 {{var ui = require('ui.tpl')}}
-{{ui.inputText->isMacro}}
+-{{ui.inputText->isMacro}}-
 
 -{{'FOOabcsTrInGs'->replace(/[A-Z]+/g, replacer)}}-
 {{getRand(-300)}}

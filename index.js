@@ -8,6 +8,7 @@ Histone.setResourceLoader(function(requestURI, ret) {
 	});
 });
 
+
 fs.readFile('template.tpl', 'UTF-8', function(error, template) {
 	template = Histone(template);
 	// var start = new Date().getTime();
