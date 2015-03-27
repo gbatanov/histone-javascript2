@@ -1,6 +1,8 @@
 var RTTI = require('../RTTI.js'),
 	Runtime = require('../Runtime.js'),
-	Utils = require('../Utils.js');
+	Utils = require('../Utils.js'),
+	Utils_toInt = Utils.toInt,
+	Utils_resolveURI = Utils.resolveURI;
 
 var RESOURCE_CACHE = {};
 
@@ -15,7 +17,7 @@ RTTI.register(RTTI.T_GLOBAL, 'resolveURI', function(self, args, scope) {
 	if (typeof relURI !== 'string') return;
 	var baseURI = (args.length > 1 ? args[1] : scope.getBaseURI());
 	if (typeof baseURI !== 'string') return;
-	var absURI = Utils.resolveURI(relURI, baseURI);
+	var absURI = Utils_resolveURI(relURI, baseURI);
 	return (typeof absURI === 'string' ? absURI : undefined);
 });
 
@@ -27,7 +29,7 @@ RTTI.register(RTTI.T_GLOBAL, 'getUniqueId', function(self) {
 });
 
 RTTI.register(RTTI.T_GLOBAL, 'getRand', function(self, args) {
-	var min = Utils.toInt(args[0]), max = Utils.toInt(args[1]);
+	var min = Utils_toInt(args[0]), max = Utils_toInt(args[1]);
 	if (typeof min !== 'number') min = 0;
 	if (typeof max !== 'number') max = Math.pow(2, 32) - 1;
 	if (min > max) { min = [max, max = min][0]; }
@@ -38,7 +40,7 @@ RTTI.register(RTTI.T_GLOBAL, 'getRand', function(self, args) {
 RTTI.register(RTTI.T_GLOBAL, 'loadText', function(self, args, scope, ret) {
 	var requestURI = args[0];
 	if (typeof requestURI !== 'string') return ret();
-	requestURI = Utils.resolveURI(requestURI, scope.getBaseURI());
+	requestURI = Utils_resolveURI(requestURI, scope.getBaseURI());
 	if (typeof requestURI !== 'string') return ret();
 	var cacheKey = JSON.stringify(['loadText', requestURI]);
 	if (RESOURCE_CACHE.hasOwnProperty(cacheKey))
@@ -52,7 +54,7 @@ RTTI.register(RTTI.T_GLOBAL, 'loadText', function(self, args, scope, ret) {
 RTTI.register(RTTI.T_GLOBAL, 'loadJSON', function(self, args, scope, ret) {
 	var requestURI = args[0];
 	if (typeof requestURI !== 'string') return ret();
-	requestURI = Utils.resolveURI(requestURI, scope.getBaseURI());
+	requestURI = Utils_resolveURI(requestURI, scope.getBaseURI());
 	if (typeof requestURI !== 'string') return ret();
 	var cacheKey = JSON.stringify(['loadText', requestURI]);
 	if (RESOURCE_CACHE.hasOwnProperty(cacheKey))
@@ -70,7 +72,7 @@ RTTI.register(RTTI.T_GLOBAL, 'loadJSON', function(self, args, scope, ret) {
 RTTI.register(RTTI.T_GLOBAL, 'require', function(self, args, scope, ret) {
 	var requestURI = args[0];
 	if (typeof requestURI !== 'string') return ret();
-	requestURI = Utils.resolveURI(requestURI, scope.getBaseURI());
+	requestURI = Utils_resolveURI(requestURI, scope.getBaseURI());
 	if (typeof requestURI !== 'string') return ret();
 
 	var resultCache, thisObj = (args.length > 1 ? args[1] : undefined);

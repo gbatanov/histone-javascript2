@@ -7,7 +7,6 @@ var Utils_forEachAsync = Utils.forEachAsync;
 
 var RTTI_global = RTTI.getGlobal();
 
-var RTTI_newRegExp = RTTI.newRegExp;
 var RTTI_newArray = RTTI.newArray;
 var RTTI_newMacro = RTTI.newMacro;
 
@@ -27,6 +26,14 @@ function processArray(node, scope, ret) {
 			next();
 		});
 	}, function() { ret(RTTI_newArray(result)); }, 1);
+}
+
+function processRegExp(node, scope, ret) {
+	var flagsNum = node[2], flagsStr = '';
+	if (flagsNum & Constants.RE_GLOBAL) flagsStr += 'g';
+	if (flagsNum & Constants.RE_MULTILINE) flagsStr += 'm';
+	if (flagsNum & Constants.RE_IGNORECASE) flagsStr += 'i';
+	ret(new RegExp(node[1], flagsStr));
 }
 
 function processNot(node, scope, ret) {
@@ -233,7 +240,7 @@ function processNode(node, scope, retn, retf) {
 	if (node instanceof Array) switch (node[0]) {
 
 		case Constants.AST_ARRAY: processArray(node, scope, retn); break;
-		case Constants.AST_REGEXP: ret(RTTI_newRegExp(node[1], node[2])); break;
+		case Constants.AST_REGEXP: processRegExp(node, scope, retn); break;
 
 		case Constants.AST_NOT: processNot(node, scope, retn); break;
 		case Constants.AST_OR: processOr(node, scope, retn); break;
