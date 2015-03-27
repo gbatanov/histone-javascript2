@@ -1,31 +1,30 @@
 var RTTI = require('./RTTI.js'),
+	HistoneArray = require('./Array'),
+	HistoneMacro = require('./Macro'),
 	Parser = require('./parser/Parser.js'),
 	Constants = require('./Constants.js'),
 	Utils = require('./Utils.js');
 
+// console.info(HistoneArray);
+
 var Utils_forEachAsync = Utils.forEachAsync;
-
 var RTTI_global = RTTI.getGlobal();
-
 var RTTI_newArray = RTTI.newArray;
 var RTTI_newMacro = RTTI.newMacro;
-
 var RTTI_toString = RTTI.toString;
 var RTTI_toBoolean = RTTI.toBoolean;
 var RTTI_toHistone = RTTI.toHistone;
 var RTTI_callAsync = RTTI.callAsync;
+var isNumeric = Utils.isNumeric;
 
 function processArray(node, scope, ret) {
-	var result = [];
+	var result = new HistoneArray();
 	Utils_forEachAsync(node, function(node, next) {
 		processNode(node[1], scope, function(value) {
-			value = [value];
-			if (node.length > 2)
-				value.push(node[2]);
-			result.push(value);
+			result.push(value, node[2]);
 			next();
 		});
-	}, function() { ret(RTTI_newArray(result)); }, 1);
+	}, function() { ret(result); }, 1);
 }
 
 function processRegExp(node, scope, ret) {
@@ -69,8 +68,30 @@ function processTernary(node, scope, ret) {
 function processEquality(node, scope, ret) {
 	processNode(node[1], scope, function(left) {
 		processNode(node[2], scope, function(right) {
-			var result = RTTI.processEquality(left, right);
+
+			if (typeof left === 'string' && typeof right === 'number') {
+				if (isNumeric(left)) left = parseFloat(left);
+				else right = RTTI_toString(right);
+			}
+
+			else if (typeof left === 'number' && typeof right === 'string') {
+				if (isNumeric(right)) right = parseFloat(right);
+				else left = RTTI_toString(left);
+			}
+
+			if (!(typeof left === 'string' && typeof right === 'string')) {
+				if (typeof left === 'number' && typeof right === 'number') {
+					left = parseFloat(left);
+					right = parseFloat(right);
+				} else {
+					left = RTTI_toBoolean(left);
+					right = RTTI_toBoolean(right);
+				}
+			}
+
+			var result = (left === right);
 			ret(node[0] === Constants.AST_EQ ? result : !result);
+
 		});
 	});
 }
@@ -78,21 +99,69 @@ function processEquality(node, scope, ret) {
 function processRelational(node, scope, ret) {
 	processNode(node[1], scope, function(left) {
 		processNode(node[2], scope, function(right) {
-			ret(RTTI.processRelational(node[0], left, right));
+
+
+			if (typeof left === 'string' && typeof right === 'number') {
+				if (isNumeric(left)) left = parseFloat(left);
+				else right = RTTI_toString(right);
+			}
+
+			else if (typeof left === 'number' && typeof right === 'string') {
+				if (isNumeric(right)) right = parseFloat(right);
+				else left = RTTI_toString(left);
+			}
+
+			if (!(typeof left === 'number' && typeof right === 'number')) {
+				if (typeof left === 'string' && typeof right === 'string') {
+					left = left.length;
+					right = right.length;
+				} else {
+					left = RTTI_toBoolean(left);
+					right = RTTI_toBoolean(right);
+				}
+			}
+
+			switch (node[0]) {
+				case Constants.AST_LT: return ret(left < right);
+				case Constants.AST_GT: return ret(left > right);
+				case Constants.AST_LE: return ret(left <= right);
+				case Constants.AST_GE: return ret(left >= right);
+			}
+
 		});
 	});
 }
 
 function processUnaryMinus(node, scope, ret) {
 	processNode(node[1], scope, function(value) {
-		ret(RTTI.processUnaryMinus(value));
+		value = Utils.toNumber(value);
+		if (typeof value === 'number')
+			ret(-value);
+		else ret();
 	});
 }
 
 function processAddition(node, scope, ret) {
 	processNode(node[1], scope, function(left) {
 		processNode(node[2], scope, function(right) {
-			ret(RTTI.processAddition(left, right));
+
+			if (!(typeof left === 'string' || typeof right === 'string')) {
+
+				if (isNumeric(left) || isNumeric(right)) {
+					if (isNumeric(left)) left = parseFloat(left);
+					if (typeof left !== 'number') return ret();
+					if (isNumeric(right)) right = parseFloat(right);
+					if (typeof right !== 'number') return ret();
+					return ret(left + right);
+				}
+
+				if (left instanceof HistoneArray &&
+					right instanceof HistoneArray) {
+					return ret(left.concat(right));
+				}
+			}
+
+			return ret(RTTI_toString(left) + RTTI_toString(right));
 		});
 	});
 }
@@ -100,7 +169,20 @@ function processAddition(node, scope, ret) {
 function processArithmetical(node, scope, ret) {
 	processNode(node[1], scope, function(left) {
 		processNode(node[2], scope, function(right) {
-			ret(RTTI.processArithmetical(node[0], left, right));
+
+			if (isNumeric(left)) left = parseFloat(left);
+			if (typeof left !== 'number') return ret();
+
+			if (isNumeric(right)) right = parseFloat(right);
+			if (typeof right !== 'number') return ret();
+
+			switch (node[0]) {
+				case Constants.AST_SUB: return ret(left - right);
+				case Constants.AST_MUL: return ret(left * right);
+				case Constants.AST_DIV: return ret(left / right);
+				case Constants.AST_MOD: return ret(left % right);
+			}
+
 		});
 	});
 }
@@ -157,33 +239,31 @@ function processIf(node, scope, retn, retf) {
 
 function processFor(node, scope, retn, retf) {
 	processNode(node[4], scope, function(collection) {
-
 		var result = '', keyIndex = node[1], valIndex  = node[2];
 
-		var error = RTTI.iterate(collection, function(value, next, key, index, last) {
+		if (collection instanceof HistoneArray && collection.getLength()) {
+			collection.forEachAsync(function(value, next, key, index, last) {
+				var iterationScope = scope.extend();
 
-			var iterationScope = scope.extend();
+				iterationScope.putVar(RTTI_toHistone({
+					key: key,
+					value: value,
+					index: index,
+					last: last
+				}), 0);
 
-			iterationScope.putVar(RTTI_toHistone({
-				key: key,
-				value: value,
-				index: index,
-				last: last
-			}), 0);
+				if (keyIndex) iterationScope.putVar(key, keyIndex);
+				if (valIndex) iterationScope.putVar(value, valIndex);
 
-			if (keyIndex) iterationScope.putVar(key, keyIndex);
-			if (valIndex) iterationScope.putVar(value, valIndex);
+				processNode(node[3], iterationScope, function(iteration) {
+					result += iteration;
+					next();
+				}, retf);
 
-			processNode(node[3], iterationScope, function(iteration) {
-				result += iteration;
-				next();
-			}, retf);
+			}, function() { retn(result); });
+		}
 
-		}, function() { retn(result); });
-
-
-
-		if (error) Utils_forEachAsync(node, function(statement, next, index) {
+		else Utils_forEachAsync(node, function(statement, next, index) {
 			if (node.length > ++index) {
 				processNode(node[index], scope, function(value) {
 					if (!RTTI_toBoolean(value)) return next();
@@ -218,7 +298,7 @@ function processMacro(node, scope, ret) {
 			next();
 		});
 	}, function() {
-		scope.putVar(RTTI_newMacro(params, node[2], scope), node[1]);
+		scope.putVar(new HistoneMacro(params, node[2], scope), node[1]);
 		ret('');
 	}, 4, 2);
 }
