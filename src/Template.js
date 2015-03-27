@@ -1,4 +1,4 @@
-var Runtime = require('./Runtime.js');
+var Processor = require('./Processor');
 
 function Template(templateAST, baseURI) {
 	this.baseURI = baseURI;
@@ -10,8 +10,8 @@ Template.prototype.getAST = function() {
 };
 
 Template.prototype.render = function(ret, thisObj) {
-	var runtime = new Runtime(this.baseURI, thisObj);
-	runtime.process(this.templateAST, ret);
+	var processor = new Processor(this.baseURI, thisObj);
+	processor.process(this.templateAST, ret);
 };
 
 module.exports = Template;
