@@ -5,8 +5,6 @@ var Utils = require('./Utils'),
 var isNumeric = Utils.isNumeric;
 var forEachAsync = Utils.forEachAsync;
 
-var RESOURCE_LOADER = null;
-
 function HistoneGlobal() {}
 var globalObject = new HistoneGlobal();
 
@@ -143,17 +141,13 @@ function register(type, member, value) {
 	REGISTERED_TYPES[type][member] = value;
 }
 
-function setResourceLoader(resourceLoader) {
-	if (typeof resourceLoader !== 'function') return;
-	RESOURCE_LOADER = resourceLoader;
-}
-
-function loadResource(resouceURI, ret) {
-	if (typeof RESOURCE_LOADER !== 'function') ret();
-	else RESOURCE_LOADER(resouceURI, ret);
-}
-
 module.exports = {
+
+	getGlobal: getGlobal,
+	callSync: callSync,
+	callAsync: callAsync,
+
+
 
 	GET: 0,
 	CALL: 1,
@@ -169,15 +163,8 @@ module.exports = {
 	T_ARRAY: 'HistoneArray',
 	T_GLOBAL: 'HistoneGlobal',
 
-	getGlobal: getGlobal,
-	toHistone: toHistone,
 	register: register,
-	setResourceLoader: setResourceLoader,
-	loadResource: loadResource,
-
-	callSync: callSync,
-	callAsync: callAsync,
-
+	toHistone: toHistone,
 	toString: toString,
 	toBoolean: toBoolean,
 	toJSON: toJSON
