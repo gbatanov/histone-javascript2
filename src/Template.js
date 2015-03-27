@@ -10,6 +10,7 @@ Template.prototype.getAST = function() {
 };
 
 Template.prototype.render = function(ret, thisObj) {
+	if (typeof ret !== 'function') return;
 	var processor = new Processor(this.baseURI, thisObj);
 	processor.process(this.templateAST, ret);
 };
