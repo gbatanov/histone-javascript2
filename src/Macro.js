@@ -11,11 +11,11 @@ HistoneMacro.prototype.call = function(args, scope, ret) {
 		macroScope = this.scope.extend(),
 		callArgs = this.args.concat(args);
 
-	macroScope.putVar(scope.toHistone({
+	macroScope.putVar({
 		callee: this,
 		caller: scope.getBaseURI(),
 		arguments: callArgs
-	}), 0);
+	}, 0);
 
 	for (var c = 0; c < macroParams.length; c++) {
 		if (callArgs[c] === undefined)
