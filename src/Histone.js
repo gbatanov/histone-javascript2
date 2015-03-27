@@ -1,7 +1,8 @@
-var RTTI = require('./RTTI.js'),
-	Utils = require('./Utils.js'),
-	Runtime = require('./Runtime.js'),
-	Template = require('./Template.js');
+var RTTI = require('./RTTI'),
+	Utils = require('./Utils'),
+	Template = require('./Template'),
+	Processor = require('./Processor'),
+	Parser = require('./parser/Parser');
 
 function getCallerURI() {
 	var prepareStackTrace = Error.prepareStackTrace;
@@ -18,21 +19,21 @@ function Histone(template, baseURI) {
 	if (typeof baseURI !== 'string') baseURI = callerURI;
 	else baseURI = Utils.resolveURI(baseURI, callerURI);
 	if (template instanceof Template) template = template.getAST();
-	else template = Runtime.parseTemplate(template, baseURI);
+	else template = Parser(template, baseURI);
 	return new Template(template, baseURI);
 }
 
 Histone.setResourceLoader = RTTI.setResourceLoader;
 
-require('./types/Base.js');
-require('./types/Undefined.js');
-require('./types/Null.js');
-require('./types/Boolean.js');
-require('./types/Number.js');
-require('./types/String.js');
-require('./types/RegExp.js');
-require('./types/Array.js');
-require('./types/Macro.js');
-require('./types/Global.js');
+require('./types/Base');
+require('./types/Undefined');
+require('./types/Null');
+require('./types/Boolean');
+require('./types/Number');
+require('./types/String');
+require('./types/RegExp');
+require('./types/Array');
+require('./types/Macro');
+require('./types/Global');
 
 module.exports = Histone;
