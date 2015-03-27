@@ -1,5 +1,5 @@
 var RTTI = require('../RTTI.js'),
-	Runtime = require('../Runtime.js'),
+	Processor = require('../Processor'),
 	Utils = require('../Utils.js'),
 
 	RTTI_register = RTTI.register,
@@ -138,13 +138,13 @@ RTTI_register(RTTI_T_GLOBAL, 'require', function(self, args, scope, ret) {
 		getCache(['templateAST', requestURI], function(ret) {
 			RTTI.loadResource(requestURI, function(template) {
 				if (typeof template !== 'string') template = undefined;
-				else template = Runtime.parseTemplate(template, requestURI);
+				else template = Processor.parseTemplate(template, requestURI);
 				ret(template);
 			});
 		}, function(templateAST) {
 			if (typeof templateAST === 'undefined') return ret();
-			var runtime = new Runtime(requestURI, args[1]);
-			runtime.process(templateAST, ret);
+			var processor = new Processor(requestURI, args[1]);
+			processor.process(templateAST, ret);
 		});
 	}, ret);
 });

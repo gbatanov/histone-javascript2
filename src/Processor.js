@@ -9,8 +9,6 @@ var RTTI = require('./RTTI.js'),
 
 var Utils_forEachAsync = Utils.forEachAsync;
 var RTTI_global = RTTI.getGlobal();
-var RTTI_newArray = RTTI.newArray;
-var RTTI_newMacro = RTTI.newMacro;
 var RTTI_toString = RTTI.toString;
 var RTTI_toBoolean = RTTI.toBoolean;
 var RTTI_toHistone = RTTI.toHistone;
@@ -245,15 +243,15 @@ function processFor(node, scope, retn, retf) {
 			collection.forEachAsync(function(value, next, key, index, last) {
 				var iterationScope = scope.extend();
 
-				iterationScope.putVar(RTTI_toHistone({
+				iterationScope.putVar({
 					key: key,
 					value: value,
 					index: index,
 					last: last
-				}), 0);
+				}, 0);
 
-				if (keyIndex) iterationScope.putVar(key, keyIndex);
-				if (valIndex) iterationScope.putVar(value, valIndex);
+				if (keyIndex) iterationScope.putVar(key, keyIndex, true);
+				if (valIndex) iterationScope.putVar(value, valIndex, true);
 
 				processNode(node[3], iterationScope, function(iteration) {
 					result += iteration;
@@ -285,7 +283,7 @@ function processFor(node, scope, retn, retf) {
 
 function processVar(node, scope, retn) {
 	processNode(node[1], scope, function(value) {
-		scope.putVar(value, node[2]);
+		scope.putVar(value, node[2], true);
 		retn('');
 	});
 }
@@ -298,7 +296,7 @@ function processMacro(node, scope, ret) {
 			next();
 		});
 	}, function() {
-		scope.putVar(new HistoneMacro(params, node[2], scope), node[1]);
+		scope.putVar(new HistoneMacro(params, node[2], scope), node[1], true);
 		ret('');
 	}, 4, 2);
 }
@@ -376,45 +374,7 @@ function processNode(node, scope, retn, retf) {
 }
 
 
-
-function Runtime(baseURI, thisObj) {
-	this.parent = null;
-	this.variables = {};
-	this.baseURI = baseURI;
-	this.thisObj = RTTI_toHistone(thisObj);
-}
-
-Runtime.prototype.getBaseURI = function() {
-	return this.baseURI;
-};
-
-Runtime.prototype.getThis = function() {
-	return this.thisObj;
-};
-
-Runtime.prototype.putVar = function(value, index) {
-	this.variables[index] = value;
-};
-
-Runtime.prototype.getVar = function(level, index) {
-	var scope = this;
-	while (level--) scope = scope.parent;
-	return scope.variables[index];
-};
-
-Runtime.prototype.extend = function() {
-	var scope = new Runtime(this.baseURI, this.thisObj);
-	scope.parent = this;
-	return scope;
-};
-
-Runtime.prototype.process = function(node, ret) {
-	processNode(node, this, ret);
-};
-
-Runtime.prototype.toHistone = RTTI_toHistone;
-
-Runtime.parseTemplate = function(template, baseURI) {
+Processor.parseTemplate = function(template, baseURI) {
 	if (typeof template === 'string')
 		return Parser(template, baseURI);
 	if (template instanceof Array)
@@ -422,4 +382,41 @@ Runtime.parseTemplate = function(template, baseURI) {
 	return [Constants.AST_NODES];
 };
 
-module.exports = Runtime;
+
+
+function Processor(baseURI, thisObj) {
+	this.variables = [];
+	this.parents = [];
+	this.baseURI = baseURI;
+	this.thisObj = RTTI_toHistone(thisObj);
+}
+
+Processor.prototype.getBaseURI = function() {
+	return this.baseURI;
+};
+
+Processor.prototype.getThis = function() {
+	return this.thisObj;
+};
+
+Processor.prototype.putVar = function(value, index, raw) {
+	if (!raw) value = RTTI_toHistone(value);
+	this.variables[index] = value;
+};
+
+Processor.prototype.getVar = function(level, index) {
+	if (!level) return this.variables[index];
+	return this.parents[level - 1].variables[index];
+};
+
+Processor.prototype.extend = function() {
+	var scope = new Processor(this.baseURI, this.thisObj);
+	scope.parents = [this].concat(this.parents);
+	return scope;
+};
+
+Processor.prototype.process = function(node, ret) {
+	processNode(node, this, ret);
+};
+
+module.exports = Processor;
