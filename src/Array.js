@@ -1,8 +1,25 @@
+var Utils = require('./Utils');
+
 function HistoneArray() {
 	this.keys = [];
 	this.values = [];
 	this.nextIndex = 0;
 }
+
+HistoneArray.prototype.getLength = function() {
+	return this.keys.length;
+};
+
+HistoneArray.prototype.forEachAsync = function(retn, retf) {
+
+	var keys = this.keys, index = 0,
+		last = this.values.length - 1;
+
+	Utils.forEachAsync(this.values, function(value, next, index) {
+		retn(value, next, keys[index], index, last);
+	}, retf);
+
+};
 
 HistoneArray.prototype.push = function(value, key) {
 	if (typeof key === 'undefined') {
