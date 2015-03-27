@@ -643,15 +643,21 @@ function markReferences(node, scopeChain) {
 	}
 }
 
-function Parser(input, baseURI) {
-	var ctx = tokenize(input, baseURI),
-		result = NodeArray(ctx);
-	if (!ctx.next(ctx.$EOF)) ctx.error('EOF');
 
-	Optimize(result);
 
-	markReferences(result);
-	return result;
+
+function Parser(template, baseURI) {
+
+	if (typeof template === 'string') {
+		var ctx = tokenize(template, baseURI);
+		template = NodeArray(ctx);
+		if (!ctx.next(ctx.$EOF)) ctx.error('EOF');
+		Optimize(template);
+		markReferences(template);
+	}
+
+
+	return template;
 }
 
 module.exports = Parser;
