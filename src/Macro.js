@@ -1,15 +1,15 @@
-function HistoneMacro(params, body, scope, args) {
+function HistoneMacro(params, body, scope) {
 	this.params = params;
 	this.body = body;
 	this.scope = scope;
-	this.args = (args instanceof Array ? args : []);
+	this.args = [];
 }
 
 HistoneMacro.prototype.call = function(args, scope, ret) {
 
 	var macroParams = this.params,
 		macroScope = this.scope.extend(),
-		callArgs = (this.args || []).concat(args);
+		callArgs = this.args.concat(args);
 
 	macroScope.putVar(scope.toHistone({
 		callee: this,
@@ -39,18 +39,12 @@ HistoneMacro.prototype.clone = function() {
 
 HistoneMacro.prototype.bind = function(args) {
 	if (args instanceof Array && args.length) {
-		return new HistoneMacro(
-			this.params,
-			this.body,
-			this.scope,
-			this.args.concat(args)
-		);
+		var macro = this.clone();
+		macro.args = macro.args.concat(args);
+		return macro;
 	}
 	return this;
 };
 
-HistoneMacro.prototype.extend = function(props) {
-
-};
 
 module.exports = HistoneMacro;
