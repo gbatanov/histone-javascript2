@@ -5,6 +5,11 @@ var RTTI = require('../RTTI.js'),
 	Utils_resolveURI = Utils.resolveURI;
 
 var RESOURCE_CACHE = {};
+var WEEK_DAYS_SHORT = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+var WEEK_DAYS_LONG = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье'];
+var MONTH_NAMES_SHORT = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];
+var MONTH_NAMES_LONG = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+
 
 RTTI.register(RTTI.T_GLOBAL, 'toString', '(Global)');
 
@@ -26,6 +31,50 @@ RTTI.register(RTTI.T_GLOBAL, 'getUniqueId', function(self) {
 		var r = Math.random() * 16 | 0, v = (c === 'x' ? r : r & 0x3 | 0x8);
 		return v.toString(16);
 	});
+});
+
+RTTI.register(RTTI.T_GLOBAL, 'getWeekDayNameShort', function(self, args) {
+	var day = Utils_toInt(args[0]);
+	if (typeof day === 'number') return WEEK_DAYS_SHORT[--day];
+});
+
+RTTI.register(RTTI.T_GLOBAL, 'getWeekDayNameLong', function(self, args) {
+	var day = Utils_toInt(args[0]);
+	if (typeof day === 'number') return WEEK_DAYS_LONG[--day];
+});
+
+RTTI.register(RTTI.T_GLOBAL, 'getMonthNameShort', function(self, args) {
+	var month = Utils_toInt(args[0]);
+	if (typeof month === 'number') return MONTH_NAMES_SHORT[--month];
+});
+
+RTTI.register(RTTI.T_GLOBAL, 'getMonthNameLong', function(self, args) {
+	var month = Utils_toInt(args[0]);
+	if (typeof month === 'number') return MONTH_NAMES_LONG[--month];
+});
+
+RTTI.register(RTTI.T_GLOBAL, 'getDaysInMonth', function(self, args) {
+	var year = Utils_toInt(args[0]), month = Utils_toInt(args[1]);
+	if (typeof year === 'number' && year > 0 &&
+		typeof month === 'number' && month > 0 && month < 13) {
+		return (new Date(year, month, 0)).getDate();
+	}
+});
+
+RTTI.register(RTTI.T_GLOBAL, 'getDayOfWeek', function(self, args) {
+	var year = Utils_toInt(args[0]),
+		month = Utils_toInt(args[1]),
+		day = Utils_toInt(args[2]);
+	if (typeof year === 'number' && year > 0 &&
+		typeof month === 'number' && month > 0 && month < 13 &&
+		typeof day === 'number' && day > 0 && day < 32) {
+		var date = new Date(year, month -= 1, day);
+		if (date.getFullYear() === year &&
+			date.getMonth() === month &&
+			date.getDate() === day) {
+			return (date.getDay() || 7);
+		}
+	}
 });
 
 RTTI.register(RTTI.T_GLOBAL, 'getRand', function(self, args) {
