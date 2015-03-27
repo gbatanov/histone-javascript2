@@ -1,6 +1,7 @@
 var RTTI = require('./RTTI'),
 	Utils = require('./Utils'),
 	Template = require('./Template'),
+	Processor = require('./Processor'),
 	Parser = require('./parser/Parser');
 
 function getCallerURI() {
@@ -23,8 +24,9 @@ function Histone(template, baseURI) {
 }
 
 Histone.RTTI = RTTI;
-Histone.Parser = Parser;
 Histone.Utils = Utils;
+Histone.Parser = Parser;
+Histone.Processor = Processor;
 
 Histone.setResourceLoader = RTTI.setResourceLoader;
 
