@@ -1,11 +1,9 @@
-var RTTI = require('./RTTI.js'),
+var RTTI = require('./RTTI'),
+	Utils = require('./Utils'),
 	HistoneArray = require('./Array'),
 	HistoneMacro = require('./Macro'),
-	Parser = require('./parser/Parser.js'),
-	Constants = require('./Constants.js'),
-	Utils = require('./Utils.js');
-
-// console.info(HistoneArray);
+	Constants = require('./Constants'),
+	Parser = require('./parser/Parser');
 
 var Utils_forEachAsync = Utils.forEachAsync;
 var RTTI_global = RTTI.getGlobal();
@@ -372,16 +370,6 @@ function processNode(node, scope, retn, retf) {
 
 	} else retn(node);
 }
-
-
-Processor.parseTemplate = function(template, baseURI) {
-	if (typeof template === 'string')
-		return Parser(template, baseURI);
-	if (template instanceof Array)
-		return template;
-	return [Constants.AST_NODES];
-};
-
 
 
 function Processor(baseURI, thisObj) {
