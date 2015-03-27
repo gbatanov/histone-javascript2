@@ -1,5 +1,6 @@
 var RTTI = require('./RTTI'),
 	Utils = require('./Utils'),
+	Network = require('./Network'),
 	Template = require('./Template'),
 	HistoneArray = require('./Array'),
 	HistoneMacro = require('./Macro'),
@@ -31,8 +32,8 @@ Histone.Parser = Parser;
 Histone.Array = HistoneArray;
 Histone.Macro = HistoneMacro;
 Histone.Processor = Processor;
-
-Histone.setResourceLoader = RTTI.setResourceLoader;
+Histone.loadResource = Network.loadResource;
+Histone.setResourceLoader = Network.setResourceLoader;
 
 require('./types/Base');
 require('./types/Undefined');
