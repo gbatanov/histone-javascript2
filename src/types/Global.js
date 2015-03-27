@@ -101,6 +101,25 @@ RTTI_register(RTTI_T_GLOBAL, 'getRand', function(self, args) {
 	return Math.floor(Math.random() * (max - min + 1)) + min;
 });
 
+RTTI_register(RTTI_T_GLOBAL, 'range', function(self, args) {
+	var to, step = 1, result = [],
+		from = Utils_toInt(args[0]);
+	if (typeof from === 'number') {
+		if (args.length > 1) {
+			to = Utils_toInt(args[1]);
+			step = Utils_toInt(args[2]);
+			if (typeof step !== 'number' || step < 1) step = 1;
+		}
+		else if (from < 0) { to = 0; from = from + 1 }
+		else if (from > 0) { to = from - 1; from = 0 };
+		if (typeof to === 'number') {
+			if (from < to) while (from <= to) result.push(from), from += step;
+			else while (from >= to) result.push(from), from -= step;
+		}
+	}
+	return result;
+});
+
 /* @TODO, DEFAULT request params + content-type header */
 RTTI_register(RTTI_T_GLOBAL, 'loadText', function(self, args, scope, ret) {
 	var requestURI = args[0];
