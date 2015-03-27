@@ -1,22 +1,25 @@
 var RTTI = require('../RTTI.js'),
-	Utils = require('../Utils.js');
+	Utils = require('../Utils.js'),
+	RTTI_register = RTTI.register,
+	RTTI_T_STRING = RTTI.T_STRING,
+	Utils_toInt = Utils.toInt;
 
-RTTI.register(RTTI.T_STRING, 'isString', true);
+RTTI_register(RTTI_T_STRING, 'isString', true);
 
-RTTI.register(RTTI.T_STRING, 'toBoolean', function(self) {
+RTTI_register(RTTI_T_STRING, 'toBoolean', function(self) {
 	return self.length > 0;
 });
 
-RTTI.register(RTTI.T_STRING, 'toString', function(self) {
+RTTI_register(RTTI_T_STRING, 'toString', function(self) {
 	return self;
 });
 
-RTTI.register(RTTI.T_STRING, 'toJSON', function(self) {
+RTTI_register(RTTI_T_STRING, 'toJSON', function(self) {
 	return JSON.stringify(self);
 });
 
-RTTI.register(RTTI.T_STRING, RTTI.GET, function(self, args) {
-	var index = Utils.toInt(args[0]);
+RTTI_register(RTTI_T_STRING, RTTI.GET, function(self, args) {
+	var index = Utils_toInt(args[0]);
 	if (index !== undefined) {
 		var length = self.length;
 		if (index < 0) index = length + index;
@@ -26,26 +29,26 @@ RTTI.register(RTTI.T_STRING, RTTI.GET, function(self, args) {
 	}
 });
 
-RTTI.register(RTTI.T_STRING, 'length', function(self) {
+RTTI_register(RTTI_T_STRING, 'length', function(self) {
 	return self.length;
 });
 
-RTTI.register(RTTI.T_STRING, 'toLowerCase', function(self) {
+RTTI_register(RTTI_T_STRING, 'toLowerCase', function(self) {
 	return self.toLowerCase();
 });
 
-RTTI.register(RTTI.T_STRING, 'toUpperCase', function(self) {
+RTTI_register(RTTI_T_STRING, 'toUpperCase', function(self) {
 	return self.toUpperCase();
 });
 
-RTTI.register(RTTI.T_STRING, 'split', function(self, args) {
+RTTI_register(RTTI_T_STRING, 'split', function(self, args) {
 	var separator = args[0];
 	if (typeof separator !== 'string') separator = '';
 	return self.split(separator);
 });
 
-RTTI.register(RTTI.T_STRING, 'charCodeAt', function(self, args) {
-	var index = Utils.toInt(args[0]);
+RTTI_register(RTTI_T_STRING, 'charCodeAt', function(self, args) {
+	var index = Utils_toInt(args[0]);
 	if (typeof index === 'number') {
 		var length = self.length;
 		if (index < 0) index = length + index;
@@ -55,12 +58,12 @@ RTTI.register(RTTI.T_STRING, 'charCodeAt', function(self, args) {
 	}
 });
 
-RTTI.register(RTTI.T_STRING, 'toNumber', function(self, args) {
+RTTI_register(RTTI_T_STRING, 'toNumber', function(self, args) {
 	self = Utils.toNumber(self);
 	return (typeof self === 'undefined' ? args[0] : self);
 });
 
-RTTI.register(RTTI.T_STRING, 'strip', function(self, args) {
+RTTI_register(RTTI_T_STRING, 'strip', function(self, args) {
 	var arg, chars = '', start = -1, length = self.length;
 	while (args.length) if (typeof (arg = args.shift()) === 'string') chars += arg;
 	if (chars.length === 0) chars = ' \n\r\t';
@@ -69,10 +72,10 @@ RTTI.register(RTTI.T_STRING, 'strip', function(self, args) {
 	return self.slice(start, length + 1);
 });
 
-RTTI.register(RTTI.T_STRING, 'slice', function(self, args) {
+RTTI_register(RTTI_T_STRING, 'slice', function(self, args) {
 	var strlen = self.length,
-		start = (args.length > 0 ? Utils.toInt(args[0]) : 0),
-		length = (args.length > 1 ? Utils.toInt(args[1]) : strlen);
+		start = (args.length > 0 ? Utils_toInt(args[0]) : 0),
+		length = (args.length > 1 ? Utils_toInt(args[1]) : strlen);
 	if (start === undefined || length === undefined) return;
 	if (start < 0) start = strlen + start;
 	if (start < 0) start = 0;

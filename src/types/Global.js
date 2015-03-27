@@ -1,6 +1,9 @@
 var RTTI = require('../RTTI.js'),
 	Runtime = require('../Runtime.js'),
 	Utils = require('../Utils.js'),
+
+	RTTI_register = RTTI.register,
+	RTTI_T_GLOBAL = RTTI.T_GLOBAL,
 	Utils_toInt = Utils.toInt,
 	Utils_resolveURI = Utils.resolveURI;
 
@@ -11,13 +14,13 @@ var MONTH_NAMES_SHORT = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Ию
 var MONTH_NAMES_LONG = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
 
 
-RTTI.register(RTTI.T_GLOBAL, 'toString', '(Global)');
+RTTI_register(RTTI_T_GLOBAL, 'toString', '(Global)');
 
-RTTI.register(RTTI.T_GLOBAL, 'getBaseURI', function(self, args, scope) {
+RTTI_register(RTTI_T_GLOBAL, 'getBaseURI', function(self, args, scope) {
 	return scope.getBaseURI();
 });
 
-RTTI.register(RTTI.T_GLOBAL, 'resolveURI', function(self, args, scope) {
+RTTI_register(RTTI_T_GLOBAL, 'resolveURI', function(self, args, scope) {
 	var relURI = args[0];
 	if (typeof relURI !== 'string') return;
 	var baseURI = (args.length > 1 ? args[1] : scope.getBaseURI());
@@ -26,34 +29,34 @@ RTTI.register(RTTI.T_GLOBAL, 'resolveURI', function(self, args, scope) {
 	return (typeof absURI === 'string' ? absURI : undefined);
 });
 
-RTTI.register(RTTI.T_GLOBAL, 'getUniqueId', function(self) {
+RTTI_register(RTTI_T_GLOBAL, 'getUniqueId', function(self) {
 	return ('xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx').replace(/[xy]/g, function(c) {
 		var r = Math.random() * 16 | 0, v = (c === 'x' ? r : r & 0x3 | 0x8);
 		return v.toString(16);
 	});
 });
 
-RTTI.register(RTTI.T_GLOBAL, 'getWeekDayNameShort', function(self, args) {
+RTTI_register(RTTI_T_GLOBAL, 'getWeekDayNameShort', function(self, args) {
 	var day = Utils_toInt(args[0]);
 	if (typeof day === 'number') return WEEK_DAYS_SHORT[--day];
 });
 
-RTTI.register(RTTI.T_GLOBAL, 'getWeekDayNameLong', function(self, args) {
+RTTI_register(RTTI_T_GLOBAL, 'getWeekDayNameLong', function(self, args) {
 	var day = Utils_toInt(args[0]);
 	if (typeof day === 'number') return WEEK_DAYS_LONG[--day];
 });
 
-RTTI.register(RTTI.T_GLOBAL, 'getMonthNameShort', function(self, args) {
+RTTI_register(RTTI_T_GLOBAL, 'getMonthNameShort', function(self, args) {
 	var month = Utils_toInt(args[0]);
 	if (typeof month === 'number') return MONTH_NAMES_SHORT[--month];
 });
 
-RTTI.register(RTTI.T_GLOBAL, 'getMonthNameLong', function(self, args) {
+RTTI_register(RTTI_T_GLOBAL, 'getMonthNameLong', function(self, args) {
 	var month = Utils_toInt(args[0]);
 	if (typeof month === 'number') return MONTH_NAMES_LONG[--month];
 });
 
-RTTI.register(RTTI.T_GLOBAL, 'getDaysInMonth', function(self, args) {
+RTTI_register(RTTI_T_GLOBAL, 'getDaysInMonth', function(self, args) {
 	var year = Utils_toInt(args[0]), month = Utils_toInt(args[1]);
 	if (typeof year === 'number' && year > 0 &&
 		typeof month === 'number' && month > 0 && month < 13) {
@@ -61,7 +64,7 @@ RTTI.register(RTTI.T_GLOBAL, 'getDaysInMonth', function(self, args) {
 	}
 });
 
-RTTI.register(RTTI.T_GLOBAL, 'getDayOfWeek', function(self, args) {
+RTTI_register(RTTI_T_GLOBAL, 'getDayOfWeek', function(self, args) {
 	var year = Utils_toInt(args[0]),
 		month = Utils_toInt(args[1]),
 		day = Utils_toInt(args[2]);
@@ -77,7 +80,7 @@ RTTI.register(RTTI.T_GLOBAL, 'getDayOfWeek', function(self, args) {
 	}
 });
 
-RTTI.register(RTTI.T_GLOBAL, 'getRand', function(self, args) {
+RTTI_register(RTTI_T_GLOBAL, 'getRand', function(self, args) {
 	var min = Utils_toInt(args[0]), max = Utils_toInt(args[1]);
 	if (typeof min !== 'number') min = 0;
 	if (typeof max !== 'number') max = Math.pow(2, 32) - 1;
@@ -86,7 +89,7 @@ RTTI.register(RTTI.T_GLOBAL, 'getRand', function(self, args) {
 });
 
 /* @TODO, DEFAULT request params + content-type header */
-RTTI.register(RTTI.T_GLOBAL, 'loadText', function(self, args, scope, ret) {
+RTTI_register(RTTI_T_GLOBAL, 'loadText', function(self, args, scope, ret) {
 	var requestURI = args[0];
 	if (typeof requestURI !== 'string') return ret();
 	requestURI = Utils_resolveURI(requestURI, scope.getBaseURI());
@@ -100,7 +103,7 @@ RTTI.register(RTTI.T_GLOBAL, 'loadText', function(self, args, scope, ret) {
 	});
 });
 
-RTTI.register(RTTI.T_GLOBAL, 'loadJSON', function(self, args, scope, ret) {
+RTTI_register(RTTI_T_GLOBAL, 'loadJSON', function(self, args, scope, ret) {
 	var requestURI = args[0];
 	if (typeof requestURI !== 'string') return ret();
 	requestURI = Utils_resolveURI(requestURI, scope.getBaseURI());
@@ -118,7 +121,7 @@ RTTI.register(RTTI.T_GLOBAL, 'loadJSON', function(self, args, scope, ret) {
 	});
 });
 
-RTTI.register(RTTI.T_GLOBAL, 'require', function(self, args, scope, ret) {
+RTTI_register(RTTI_T_GLOBAL, 'require', function(self, args, scope, ret) {
 	var requestURI = args[0];
 	if (typeof requestURI !== 'string') return ret();
 	requestURI = Utils_resolveURI(requestURI, scope.getBaseURI());

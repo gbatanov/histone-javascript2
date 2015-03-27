@@ -1,6 +1,8 @@
-var RTTI = require('../RTTI.js');
+var RTTI = require('../RTTI.js'),
+	RTTI_register = RTTI.register,
+	RTTI_T_UNDEFINED = RTTI.T_UNDEFINED;
 
-RTTI.register(RTTI.T_UNDEFINED, 'isUndefined', true);
-RTTI.register(RTTI.T_UNDEFINED, 'toString', '');
-RTTI.register(RTTI.T_UNDEFINED, 'toBoolean', false);
-RTTI.register(RTTI.T_UNDEFINED, 'toJSON', null);
+RTTI_register(RTTI_T_UNDEFINED, 'isUndefined', true);
+RTTI_register(RTTI_T_UNDEFINED, 'toString', '');
+RTTI_register(RTTI_T_UNDEFINED, 'toBoolean', false);
+RTTI_register(RTTI_T_UNDEFINED, 'toJSON', null);

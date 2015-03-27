@@ -1,12 +1,15 @@
 var RTTI = require('../RTTI.js'),
 	Utils = require('../Utils.js'),
 	HistoneMacro = require('../Macro.js'),
+	RTTI_register = RTTI.register,
+	RTTI_T_ARRAY = RTTI.T_ARRAY,
+	Utils_toInt = Utils.toInt,
 	forEachAsync = Utils.forEachAsync;
 
-RTTI.register(RTTI.T_ARRAY, 'isArray', true);
-RTTI.register(RTTI.T_ARRAY, 'toBoolean', true);
+RTTI_register(RTTI_T_ARRAY, 'isArray', true);
+RTTI_register(RTTI_T_ARRAY, 'toBoolean', true);
 
-RTTI.register(RTTI.T_ARRAY, 'toString', function(self) {
+RTTI_register(RTTI_T_ARRAY, 'toString', function(self) {
 	var c, value,  result = [], values = self.values;
 	for (c = 0; c < values.length; c++) {
 		value = RTTI.toString(values[c]);
@@ -15,7 +18,7 @@ RTTI.register(RTTI.T_ARRAY, 'toString', function(self) {
 	return result.join(' ');
 });
 
-RTTI.register(RTTI.T_ARRAY, 'toJSON', function(self) {
+RTTI_register(RTTI_T_ARRAY, 'toJSON', function(self) {
 	var index = 0, result = [], isArray = true,
 		keys = self.keys, values = self.values;
 	for (var c = 0; c < values.length; c++) {
@@ -30,33 +33,33 @@ RTTI.register(RTTI.T_ARRAY, 'toJSON', function(self) {
 	}).join(',') + '}';
 });
 
-RTTI.register(RTTI.T_ARRAY, RTTI.GET, function(self, args) {
+RTTI_register(RTTI_T_ARRAY, RTTI.GET, function(self, args) {
 	var key = args[0];
 	var keyIndex = self.keys.indexOf(key);
 	if (keyIndex !== -1) return self.values[keyIndex];
 });
 
-RTTI.register(RTTI.T_ARRAY, 'length', function(self) {
+RTTI_register(RTTI_T_ARRAY, 'length', function(self) {
 	return self.values.length;
 });
 
-RTTI.register(RTTI.T_ARRAY, 'keys', function(self) {
+RTTI_register(RTTI_T_ARRAY, 'keys', function(self) {
 	return self.keys;
 });
 
-RTTI.register(RTTI.T_ARRAY, 'values', function(self) {
+RTTI_register(RTTI_T_ARRAY, 'values', function(self) {
 	return self.values;
 });
 
 
 
 
-RTTI.register(RTTI.T_ARRAY, 'slice', function(self, args) {
+RTTI_register(RTTI_T_ARRAY, 'slice', function(self, args) {
 
 	var values = self.values,
 		arrLen = values.length,
-		offset = Utils.toInt(args[0]),
-		length = Utils.toInt(args[1]);
+		offset = Utils_toInt(args[0]),
+		length = Utils_toInt(args[1]);
 
 	if (typeof offset !== 'number') offset = 0;
 	if (offset < 0) offset = arrLen + offset;
@@ -71,8 +74,8 @@ RTTI.register(RTTI.T_ARRAY, 'slice', function(self, args) {
 	return values.slice(offset, offset + length);
 });
 
-RTTI.register(RTTI.T_ARRAY, 'chunk', function(self, args) {
-	var size = Utils.toInt(args[0]);
+RTTI_register(RTTI_T_ARRAY, 'chunk', function(self, args) {
+	var size = Utils_toInt(args[0]);
 	if (typeof size === 'number' && size > 0) {
 		var result = [], values = self.values;
 		for (var chunk, c = 0; c < values.length; c++) {
@@ -84,7 +87,7 @@ RTTI.register(RTTI.T_ARRAY, 'chunk', function(self, args) {
 	return self;
 });
 
-RTTI.register(RTTI.T_ARRAY, 'join', function(self, args) {
+RTTI_register(RTTI_T_ARRAY, 'join', function(self, args) {
 	var result = [], values = self.values, separator = '';
 	if (args.length > 0) separator = RTTI.toString(args[0]);
 	for (var c = 0; c < values.length; c++)
@@ -92,7 +95,7 @@ RTTI.register(RTTI.T_ARRAY, 'join', function(self, args) {
 	return result.join(separator);
 });
 
-RTTI.register(RTTI.T_ARRAY, 'every', function(self, args, scope, ret) {
+RTTI_register(RTTI_T_ARRAY, 'every', function(self, args, scope, ret) {
 	var filter = args.shift();
 	if (filter instanceof HistoneMacro) {
 		var result = false, keys = self.keys;
@@ -104,7 +107,7 @@ RTTI.register(RTTI.T_ARRAY, 'every', function(self, args, scope, ret) {
 	} else ret(false);
 });
 
-RTTI.register(RTTI.T_ARRAY, 'some', function(self, args, scope, ret) {
+RTTI_register(RTTI_T_ARRAY, 'some', function(self, args, scope, ret) {
 	var filter = args.shift();
 	if (filter instanceof HistoneMacro) {
 		var result = false, keys = self.keys;
@@ -116,7 +119,7 @@ RTTI.register(RTTI.T_ARRAY, 'some', function(self, args, scope, ret) {
 	} else ret(false);
 });
 
-RTTI.register(RTTI.T_ARRAY, 'filter', function(self, args, scope, ret) {
+RTTI_register(RTTI_T_ARRAY, 'filter', function(self, args, scope, ret) {
 	var filter = args.shift();
 	if (filter instanceof HistoneMacro) {
 		var result = [], keys = self.keys;
@@ -129,7 +132,7 @@ RTTI.register(RTTI.T_ARRAY, 'filter', function(self, args, scope, ret) {
 	} else ret([]);
 });
 
-RTTI.register(RTTI.T_ARRAY, 'map', function(self, args, scope, ret) {
+RTTI_register(RTTI_T_ARRAY, 'map', function(self, args, scope, ret) {
 	var filter = args.shift(), keys = self.keys, result = new Array(keys.length);
 	if (filter instanceof HistoneMacro) {
 		forEachAsync(self.values, function(value, next, index) {

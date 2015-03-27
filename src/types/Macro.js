@@ -1,16 +1,18 @@
 var RTTI = require('../RTTI.js'),
 	HistoneArray = require('../Array.js'),
-	HistoneMacro = require('../Macro.js');
+	HistoneMacro = require('../Macro.js'),
+	RTTI_register = RTTI.register,
+	RTTI_T_MACRO = RTTI.T_MACRO;
 
-RTTI.register(RTTI.T_MACRO, 'isMacro', true);
-RTTI.register(RTTI.T_MACRO, 'toBoolean', true);
-RTTI.register(RTTI.T_MACRO, 'toString', '(Macro)');
+RTTI_register(RTTI_T_MACRO, 'isMacro', true);
+RTTI_register(RTTI_T_MACRO, 'toBoolean', true);
+RTTI_register(RTTI_T_MACRO, 'toString', '(Macro)');
 
-RTTI.register(RTTI.T_MACRO, RTTI.GET, function(self, args) {
+RTTI_register(RTTI_T_MACRO, RTTI.GET, function(self, args) {
 	return RTTI.callSync(self.props, RTTI.GET, args);
 });
 
-RTTI.register(RTTI.T_MACRO, RTTI.CALL, function(self, args, scope, ret) {
+RTTI_register(RTTI_T_MACRO, RTTI.CALL, function(self, args, scope, ret) {
 
 	var macroParams = self.params,
 		macroScope = self.scope.extend(),
@@ -32,11 +34,11 @@ RTTI.register(RTTI.T_MACRO, RTTI.CALL, function(self, args, scope, ret) {
 
 });
 
-RTTI.register(RTTI.T_MACRO, 'bind', function(self, args) {
+RTTI_register(RTTI_T_MACRO, 'bind', function(self, args) {
 	return self.bind(args);
 });
 
-RTTI.register(RTTI.T_MACRO, 'extend', function(self, args) {
+RTTI_register(RTTI_T_MACRO, 'extend', function(self, args) {
 	if (args.length > 0) {
 		self = self.clone();
 		self.props = args[0];
