@@ -1,7 +1,8 @@
-var RTTI = require('../RTTI.js'),
-	Processor = require('../Processor'),
-	Utils = require('../Utils.js'),
+var RTTI = require('../RTTI'),
+	Utils = require('../Utils'),
+	Network = require('../Network'),
 	Parser = require('../parser/Parser'),
+	Processor = require('../Processor'),
 
 	RTTI_register = RTTI.register,
 	RTTI_T_GLOBAL = RTTI.T_GLOBAL,
@@ -107,7 +108,7 @@ RTTI_register(RTTI_T_GLOBAL, 'loadText', function(self, args, scope, ret) {
 	requestURI = Utils_resolveURI(requestURI, scope.getBaseURI());
 	if (typeof requestURI !== 'string') return ret();
 	getCache(['loadText', requestURI], function(ret) {
-		RTTI.loadResource(requestURI, function(result) {
+		Network.loadResource(requestURI, function(result) {
 			ret(typeof result === 'string' ? result : undefined);
 		});
 	}, ret);
@@ -119,7 +120,7 @@ RTTI_register(RTTI_T_GLOBAL, 'loadJSON', function(self, args, scope, ret) {
 	requestURI = Utils_resolveURI(requestURI, scope.getBaseURI());
 	if (typeof requestURI !== 'string') return ret();
 	getCache(['loadJSON', requestURI], function(ret) {
-		RTTI.loadResource(requestURI, function(result) {
+		Network.loadResource(requestURI, function(result) {
 			if (typeof result === 'string') try {
 				result = result.replace(/^\s*([$A-Z_][0-9A-Z_$]*)?\s*\(\s*/i, '');
 				result = result.replace(/\s*\)\s*(;\s*)*\s*$/, '');
@@ -137,7 +138,7 @@ RTTI_register(RTTI_T_GLOBAL, 'require', function(self, args, scope, ret) {
 	if (typeof requestURI !== 'string') return ret();
 	getCache(args.length === 1 && ['templateResult', requestURI], function(ret) {
 		getCache(['templateAST', requestURI], function(ret) {
-			RTTI.loadResource(requestURI, function(template) {
+			Network.loadResource(requestURI, function(template) {
 				if (typeof template !== 'string') template = undefined;
 				else template = Parser(template, requestURI);
 				ret(template);
