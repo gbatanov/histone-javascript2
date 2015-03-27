@@ -1,6 +1,7 @@
 var RTTI = require('../RTTI.js'),
 	Processor = require('../Processor'),
 	Utils = require('../Utils.js'),
+	Parser = require('../parser/Parser'),
 
 	RTTI_register = RTTI.register,
 	RTTI_T_GLOBAL = RTTI.T_GLOBAL,
@@ -138,7 +139,7 @@ RTTI_register(RTTI_T_GLOBAL, 'require', function(self, args, scope, ret) {
 		getCache(['templateAST', requestURI], function(ret) {
 			RTTI.loadResource(requestURI, function(template) {
 				if (typeof template !== 'string') template = undefined;
-				else template = Processor.parseTemplate(template, requestURI);
+				else template = Parser(template, requestURI);
 				ret(template);
 			});
 		}, function(templateAST) {
