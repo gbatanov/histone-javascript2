@@ -2,4 +2,4 @@
 
 {{loadText('README.md')->toJSON}}
 
-{{getRand}}
+{{10 * 30}}
