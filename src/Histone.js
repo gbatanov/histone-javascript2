@@ -24,6 +24,7 @@ function Histone(template, baseURI) {
 
 Histone.RTTI = RTTI;
 Histone.Parser = Parser;
+Histone.Utils = Utils;
 
 Histone.setResourceLoader = RTTI.setResourceLoader;
 
