@@ -17,7 +17,7 @@ function processArray(node, scope, ret) {
 	var result = new HistoneArray();
 	Utils_forEachAsync(node, function(node, next) {
 		processNode(node[1], scope, function(value) {
-			result.push(value, node[2]);
+			result.set(value, node[2]);
 			next();
 		});
 	}, function() { ret(result); }, 1);
