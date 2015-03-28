@@ -1,6 +1,7 @@
 var RTTI = require('../RTTI'),
 	Utils = require('../Utils'),
 	Network = require('../Network'),
+	HistoneArray = require('../Array'),
 	Parser = require('../parser/Parser'),
 	Processor = require('../Processor'),
 
@@ -99,6 +100,26 @@ RTTI_register(RTTI_T_GLOBAL, 'getRand', function(self, args) {
 	if (typeof max !== 'number') max = Math.pow(2, 32) - 1;
 	if (min > max) { min = [max, max = min][0]; }
 	return Math.floor(Math.random() * (max - min + 1)) + min;
+});
+
+RTTI_register(RTTI_T_GLOBAL, 'getMin', function(self, args) {
+	var value, result = undefined;
+	while (args.length) if (typeof (value = args.shift()) === 'number') {
+		if (typeof result === 'undefined' || value < result) result = value;
+	} else if (value instanceof HistoneArray) {
+		Array.prototype.push.apply(args, value.getValues());
+	}
+	return result;
+});
+
+RTTI_register(RTTI_T_GLOBAL, 'getMax', function(self, args) {
+	var value, result = undefined;
+	while (args.length) if (typeof (value = args.shift()) === 'number') {
+		if (typeof result === 'undefined' || value > result) result = value;
+	} else if (value instanceof HistoneArray) {
+		Array.prototype.push.apply(args, value.getValues());
+	}
+	return result;
 });
 
 RTTI_register(RTTI_T_GLOBAL, 'range', function(self, args) {
