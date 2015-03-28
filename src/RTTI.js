@@ -117,13 +117,13 @@ function toHistone(value) {
 		if (type === 'Array') {
 			var result = new HistoneArray();
 			for (var c = 0; c < value.length; c++)
-				result.push(toHistone(value[c]));
+				result.set(toHistone(value[c]));
 			return result;
 		} else if (type === 'Object') {
 			var result = new HistoneArray();
 			for (var key in value) {
 				if (value.hasOwnProperty(key)) {
-					result.push(toHistone(value[key]), key);
+					result.set(toHistone(value[key]), key);
 				}
 			}
 			return result;
