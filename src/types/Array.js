@@ -34,9 +34,7 @@ RTTI_register(RTTI_T_ARRAY, 'toJSON', function(self) {
 });
 
 RTTI_register(RTTI_T_ARRAY, RTTI.GET, function(self, args) {
-	var key = args[0];
-	var keyIndex = self.keys.indexOf(key);
-	if (keyIndex !== -1) return self.values[keyIndex];
+	return self.get(args[0]);
 });
 
 RTTI_register(RTTI_T_ARRAY, 'length', function(self) {
