@@ -25,27 +25,19 @@ HistoneArray.prototype.forEachAsync = function(retn, retf) {
 
 };
 
-HistoneArray.prototype.push = function(value, key) {
+HistoneArray.prototype.set = function(value, key) {
 	if (typeof key === 'undefined') {
-
 		key = String(this.nextIndex++);
 		this.keys.push(key);
 		this.values.push(value);
-
-	}
-
-	else if (typeof key === 'string') {
+	} else {
 		this.keys.push(key);
 		this.values.push(value);
-	}
-
-	else {
-		throw 'x';
 	}
 };
 
 HistoneArray.prototype.get = function(key) {
-	var keyIndex = this.keys.indexOf(key);
+	var keyIndex = this.keys.indexOf(String(key));
 	if (keyIndex !== -1) return this.values[keyIndex];
 };
 
