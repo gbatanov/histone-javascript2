@@ -13,3 +13,6 @@ RTTI_register(RTTI_T_BASE, 'isMacro', false);
 RTTI_register(RTTI_T_BASE, 'toString', '');
 RTTI_register(RTTI_T_BASE, 'toBoolean', false);
 RTTI_register(RTTI_T_BASE, 'toJSON', 'null');
+RTTI_register(RTTI_T_BASE, 'toNumber', function(self, args) {
+	return args[0];
+});

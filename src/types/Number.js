@@ -27,6 +27,10 @@ RTTI_register(RTTI_T_NUMBER, 'toString', function(self) {
 	return numeric + result;
 });
 
+RTTI_register(RTTI_T_NUMBER, 'toNumber', function(self) {
+	return self;
+});
+
 RTTI_register(RTTI_T_NUMBER, 'toJSON', function(self) {
 	return JSON.stringify(self);
 });

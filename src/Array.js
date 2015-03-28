@@ -10,6 +10,10 @@ HistoneArray.prototype.getLength = function() {
 	return this.keys.length;
 };
 
+HistoneArray.prototype.getValues = function() {
+	return this.values;
+};
+
 HistoneArray.prototype.forEachAsync = function(retn, retf) {
 
 	var keys = this.keys, index = 0,
