@@ -164,7 +164,7 @@ RTTI_register(RTTI_T_GLOBAL, 'loadJSON', function(self, args, scope, ret) {
 			if (typeof result === 'string') try {
 				result = result.replace(/^\s*([$A-Z_][0-9A-Z_$]*)?\s*\(\s*/i, '');
 				result = result.replace(/\s*\)\s*(;\s*)*\s*$/, '');
-				ret(JSON.parse(result));
+				return ret(JSON.parse(result));
 			} catch (exception) {}
 			ret();
 		});
