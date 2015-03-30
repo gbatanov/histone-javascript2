@@ -113,15 +113,13 @@ function getGlobal() {
 
 function toHistone(value) {
 	var type = getType(value);
-	if (!REGISTERED_TYPES.hasOwnProperty(type)) {
-		var result = new HistoneArray();
-		if (type === 'Array') for (var c = 0; c < value.length; c++)
-			result.set(toHistone(value[c]));
-		else for (var key in value) if (value.hasOwnProperty(key))
-			result.set(toHistone(value[key]), key);
-		return result;
-	}
-	return value;
+	if (REGISTERED_TYPES.hasOwnProperty(type)) return value;
+	var key, result = new HistoneArray();
+	if (type === 'Array') for (key = 0; key < value.length; key++)
+		result.set(toHistone(value[key]));
+	else for (key in value) if (value.hasOwnProperty(key))
+		result.set(toHistone(value[key]), key);
+	return result;
 }
 
 function register(type, member, value) {
