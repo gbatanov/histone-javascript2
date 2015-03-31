@@ -6,6 +6,14 @@ var RTTI = require('../RTTI'),
 
 RTTI_register(RTTI_T_NUMBER, 'isNumber', true);
 
+RTTI_register(RTTI_T_NUMBER, 'isInt', function(self) {
+	return (self % 1 === 0);
+});
+
+RTTI_register(RTTI_T_NUMBER, 'isFloat', function(self) {
+	return (self % 1 !== 0);
+});
+
 RTTI_register(RTTI_T_NUMBER, 'toBoolean', function(self) {
 	return !!self;
 });
@@ -49,14 +57,6 @@ RTTI_register(RTTI_T_NUMBER, 'toCeil', function(self) {
 
 RTTI_register(RTTI_T_NUMBER, 'toRound', function(self) {
 	return Math.round(self);
-});
-
-RTTI_register(RTTI_T_NUMBER, 'isInt', function(self) {
-	return (self % 1 === 0);
-});
-
-RTTI_register(RTTI_T_NUMBER, 'isFloat', function(self) {
-	return (self % 1 !== 0);
 });
 
 RTTI_register(RTTI_T_NUMBER, 'toChar', function(self) {
